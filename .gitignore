@@ -1,0 +1,15 @@
+__pycache__
+.vscode
+logs/
+pid
+start.sh
+stop.sh
+
+# .env contient le token du bot qui doit absolument rester privé
+.env
+
+# resources contient des polices payantes (et des designs customisés)
+resources
+
+# La base de données
+data/database.db
