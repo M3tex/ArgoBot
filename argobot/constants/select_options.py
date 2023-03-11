@@ -89,6 +89,11 @@ INTERETS: list[discord.SelectOption] = [
         label = "Plongée Sportive",
         description = "Je pratique la plongée sportive",
         value = "5"
+    ),
+    discord.SelectOption (
+        label = "Milieu Associatif",
+        description = "Je suis actif au sein d'une association",
+        value = "6"
     )
 ]
 
@@ -119,6 +124,16 @@ PROFESSIONS: list[discord.SelectOption] = [
         label = "Scaphandrier",
         description = "J'aime bien avoir la tête au sec !",
         value = "4"
+    ),
+    discord.SelectOption (
+        label = "Centre de plongée",
+        description = "Je possède / gère un centre de plongée",
+        value = "5"
+    ),
+    discord.SelectOption (
+        label = "Médecin Hyperbare",
+        description = "Je m'y connais en bubulles !",
+        value = "6"
     )
 ]
 
