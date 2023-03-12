@@ -29,7 +29,7 @@ class Plongeur():
 
     async def est_dans_db(self):
         """Renvoie True si le plongeur est dans la base de données, False sinon"""
-        conn = await database.init_bd()
+        conn = await database.connexion()
         cur = await conn.cursor()
 
         result = bool(await (await cur.execute("SELECT * FROM Plongeur WHERE idPlongeur = ?", [self.user.id])).fetchall())
@@ -42,7 +42,7 @@ class Plongeur():
 
     async def supprime(self):
         """Supprime le plongeur de la base de données"""
-        conn = await database.init_bd()
+        conn = await database.connexion()
         cur = await conn.cursor()
 
         for request in sql_request.DELETE_REQUESTS:
@@ -105,7 +105,7 @@ class Plongeur():
             return None
         
 
-        conn = await database.init_bd()
+        conn = await database.connexion()
         cur = await conn.cursor()
 
         id = self.user.id
@@ -139,7 +139,7 @@ class Plongeur():
         est déjà dedans).
         
         On utilise l'identifiant Discord (entier sur 18 chiffres) comme identifiant d'un utilisateur"""
-        conn = await database.init_bd()
+        conn = await database.connexion()
         cur = await conn.cursor()
 
         # Si le plongeur est déjà dans la DB on le supprime pour mettre à jour

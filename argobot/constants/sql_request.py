@@ -2,7 +2,7 @@
 # ! Aucun niveau pour SSI pour l'instant (car les mêmes que PADI)
 # Voir si il y a des niveaux spécifiques à PADI
 REMPLISSAGE_NIVEAUX = """
-INSERT INTO Niveau (idNiveau, nomNiveau, nomCourtNiveau, profondeurMaxAutonomie, idFederation)
+INSERT OR IGNORE INTO Niveau (idNiveau, nomNiveau, nomCourtNiveau, profondeurMaxAutonomie, idFederation)
 VALUES 
     (0, 'Niveau 1', 'N1', 0, 0),
     (1, 'Niveau 2', 'N2', 20, 0),
