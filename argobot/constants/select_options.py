@@ -54,8 +54,14 @@ SPECIALITES: list[discord.SelectOption] = [
         label = "Formation Secourisme",
         description = "J'ai suivi une formation de secourisme spécifique à la plongée",
         value = "8"
+    ),
+    discord.SelectOption (
+        label = "Wetsuit Filler",
+        description = "Nan, je pas n'ai pissé dans ma combi...",
+        value = "9"
     )
 ]
+
 
 
 # TODO: Voir avec les gens pour rajouter d'autres intérêts

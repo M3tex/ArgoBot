@@ -93,3 +93,41 @@ SELECT_PLONGEURACTIVITE = """
 SELECT idActivitePro FROM PlongeurTravailleDansActivitePro WHERE idPlongeur = ?"""
 
 SELECT_REQUESTS = [SELECT_PLONGEURFEDE, SELECT_PLONGEURNIVEAU, SELECT_PLONGEURINTERET, SELECT_PLONGEURSPECIALITE, SELECT_PLONGEURACTIVITE]
+
+
+
+COUNT_PLONGEUR = """
+SELECT count(*) FROM Plongeur;"""
+
+
+COUNT_FFESSM = """
+SELECT count(*) 
+FROM PlongeurAffilieAFederation 
+WHERE idFederation IN (
+    SELECT idFederation
+    FROM Federation
+    WHERE sigleFederation LIKE 'FFESSM'
+);
+"""
+
+
+COUNT_PADI = """
+SELECT count(*) 
+FROM PlongeurAffilieAFederation 
+WHERE idFederation IN (
+    SELECT idFederation
+    FROM Federation
+    WHERE sigleFederation LIKE 'PADI'
+);
+"""
+
+
+COUNT_SSI = """
+SELECT count(*) 
+FROM PlongeurAffilieAFederation 
+WHERE idFederation IN (
+    SELECT idFederation
+    FROM Federation
+    WHERE sigleFederation LIKE 'SSI'
+);
+"""

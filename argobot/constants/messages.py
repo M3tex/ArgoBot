@@ -127,4 +127,13 @@ Le système de création des cartes est probablement en maintenance :constructio
 
 
 SUPPRESSION_PLONGEUR = """
-L'utilisateur a bien été supprimé de la base de données."""
+L'utilisateur `{}` a bien été supprimé de la base de données."""
+
+
+STATS_PLONGEUR_FEDE = """
+- Il y a `{ffessm_count}` plongeurs affiliés à la FFESSM (`{ffessm_percentage:.2f}%`)
+- Il y a `{padi_count}` plongeurs affiliés à PADI (`{padi_percentage:.2f}%`)
+- Il y a `{ssi_count}` plongeurs affiliés à SSI (`{ssi_percentage:.2f}%`)
+
+*Notez qu'un plongeur peut-être affilié à plusieurs fédérations*
+"""
