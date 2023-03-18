@@ -93,7 +93,8 @@ class InfosPlongeur(Cog):
                 return
 
         await Plongeur(to_remove).supprime()
-        await ctx.respond(messages.SUPPRESSION_PLONGEUR, ephemeral=True)
+        
+        await ctx.respond(messages.SUPPRESSION_PLONGEUR.format(to_remove.display_name), ephemeral=True)
     
 
 
