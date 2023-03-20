@@ -1,5 +1,5 @@
 # ArgoBot
-ArgoBot est un petit bot utilisé sur un serveur Discord dédié à la plongée.
+ArgoBot est un petit bot utilisé sur le serveur Discord privé d'[Argonaute Plongée].
 
 
 ## Fonctionnalités
@@ -31,3 +31,4 @@ Les plongeurs ne souhaitant pas apparaître dans ces résultats de recherche pou
 
 
 [carte exemple]: examples/ArgoBot_card_example.jpg
+[Argonaute Plongée]: https://www.youtube.com/@ArgonautePlongee
