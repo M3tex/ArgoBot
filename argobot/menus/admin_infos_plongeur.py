@@ -1,17 +1,20 @@
 import discord
 from bot_class import ArgoBot
 import constants.messages as messages
-
+import constants.sql_request as requests
+from discord.ext.pages import Paginator, Page
+from database import connexion
+from constants.embeds import EmbedStatPlongeur
 
 
 
 # Menu d'administration pour les commandes liées aux infos de plongeur
 
-class Menu(discord.ui.View):
+class MenuAdminInfosPlongeur(discord.ui.View):
     def __init__(self, bot: ArgoBot):
         self.bot = bot
 
-        list_items = [DebloqueCarte(), BloqueCarte(), DebloqueDonnees(), BloqueDonnees(), ListPlongeur()]
+        list_items = [DebloqueCarte(), BloqueCarte(), DebloqueDonnees(), BloqueDonnees(), StatsPlongeur()]
         super().__init__()
 
         for it in list_items:
@@ -105,14 +108,17 @@ class BloqueDonnees(discord.ui.Button):
 
 
 
-class ListPlongeur(discord.ui.Button):
+class StatsPlongeur(discord.ui.Button):
     def __init__(self):
         super().__init__(
-            label="Lister les plongeurs",
+            label="Statistiques",
             style = discord.ButtonStyle.primary,
+            emoji="📊",
             row = 2
         )
 
     
     async def callback(self, interaction: discord.Interaction):
-        await interaction.response.edit_message(view = self.view, content="Liste pas encore implémentée :construction:")
+        embed = EmbedStatPlongeur()
+        await embed.set_stats()
+        await interaction.response.edit_message(view = None, embed = embed)

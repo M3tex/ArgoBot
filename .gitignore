@@ -13,3 +13,5 @@ resources
 
 # La base de données
 data/database.db
+
+test.py

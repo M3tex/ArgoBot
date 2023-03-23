@@ -54,8 +54,14 @@ SPECIALITES: list[discord.SelectOption] = [
         label = "Formation Secourisme",
         description = "J'ai suivi une formation de secourisme spécifique à la plongée",
         value = "8"
+    ),
+    discord.SelectOption (
+        label = "Wetsuit Filler",
+        description = "Nan, je n'ai pas pissé dans ma combi...",
+        value = "9"
     )
 ]
+
 
 
 # TODO: Voir avec les gens pour rajouter d'autres intérêts
@@ -175,36 +181,46 @@ FEDERATIONS: list[discord.SelectOption] = [
         description = "Scuba Schools International",
         emoji = "<:ssi:1071851925710061598>",
         value = "2"
+    ),
+    discord.SelectOption (
+        label = "ANMP",
+        description = "Association Nationale des Moniteurs de Plongée",
+        emoji = "<:anmp:1088502169218580581>",
+        value = "3"
     )
 ]
 
 
 
+### ------- Niveaux ------- ###
+
+# `value` -> idNiveau:idFede:profMaxAutonomie
+
 NIVEAUX_FFESSM: list[discord.SelectOption] = [
     discord.SelectOption (
         label = "Niveau 1",
         description = "Encadré à 20m",
-        value = "0"
+        value = "0:0:0"
     ),
     discord.SelectOption (
         label = "Niveau 2",
         description = "Autonome 20m, encadré 40m",
-        value = "1"
+        value = "1:0:20"
     ),
     discord.SelectOption (
         label = "Niveau 3",
         description = "Autonome 60m",
-        value = "2"
+        value = "2:0:60"
     ),
     discord.SelectOption (
         label = "Niveau 4",
         description = "Autonome 60, Guide de Palanquée",
-        value = "3"
+        value = "3:0:60"
     ),
     discord.SelectOption (
         label = "Niveau 5",
         description = "Directeur de Plongée",
-        value = "4"
+        value = "4:0:60"
     )
 ]
 
@@ -213,29 +229,90 @@ NIVEAUX_FFESSM: list[discord.SelectOption] = [
 NIVEAUX_PADI: list[discord.SelectOption] = [
     discord.SelectOption (
         label = "Open Water Diver",
-        value = "5"
+        value = "5:1:18"
     ),
     discord.SelectOption (
         label = "Adventure Diver",
-        value = "6"
+        value = "6:1:18"
     ),
     discord.SelectOption (
         label = "Advanced Open Water",
-        value = "7"
+        value = "7:1:30"
     ),
     discord.SelectOption (
         label = "Deep diver",
-        value = "8"
+        value = "8:1:40"
     ),
     discord.SelectOption (
         label = "Dive Master",
-        value = "9"
+        value = "9:1:40"
     ),
     discord.SelectOption (
         label = "Instructor",
-        value = "10"
+        value = "10:1:40"
     )
 ]
+
+
+# TODO: Voir les différences SSI & PADI (pas de différence dans les intitulés de ce que j'ai compris)
+NIVEAUX_SSI: list[discord.SelectOption] = [
+    discord.SelectOption (
+        label = "Open Water Diver",
+        value = "5:2:18"
+    ),
+    discord.SelectOption (
+        label = "Adventure Diver",
+        value = "6:2:18"
+    ),
+    discord.SelectOption (
+        label = "Advanced Open Water",
+        value = "7:2:30"
+    ),
+    discord.SelectOption (
+        label = "Deep diver",
+        value = "8:2:40"
+    ),
+    discord.SelectOption (
+        label = "Dive Master",
+        value = "9:2:40"
+    ),
+    discord.SelectOption (
+        label = "Instructor",
+        value = "10:2:40"
+    )
+]
+
+
+NIVEAUX_ANMP: list[discord.SelectOption] = [
+    discord.SelectOption (
+        label = "Niveau 1",
+        description = "Encadré à 20m",
+        value = "0:3:0"
+    ),
+    discord.SelectOption (
+        label = "Niveau 2",
+        description = "Autonome 20m, encadré 40m",
+        value = "1:3:20"
+    ),
+    discord.SelectOption (
+        label = "Niveau 3",
+        description = "Autonome 60m",
+        value = "2:3:60"
+    ),
+    discord.SelectOption (
+        label = "Niveau 4",
+        description = "Autonome 60, Guide de Palanquée",
+        value = "3:3:60"
+    ),
+    discord.SelectOption (
+        label = "Niveau 5",
+        description = "Directeur de Plongée",
+        value = "4:3:60"
+    )
+]
+
+
+NIVEAUX = NIVEAUX_FFESSM + NIVEAUX_PADI + NIVEAUX_SSI + NIVEAUX_ANMP
 
 
 
@@ -255,18 +332,16 @@ CHOIX_REFERENCEMENT: list[discord.Option] = [
 
 
 
-# TODO: Voir les différences SSI & PADI (pas de différence dans les intitulés de ce que j'ai compris)
-NIVEAUX_SSI: list[discord.SelectOption] = NIVEAUX_PADI.copy()
-
-
 
 ### Nombre de plongées
 # ! Ne pas oublier d'ajouter les emojis custom (voir si possible automatiquement via le bot ?)
-__range_nb_plonges = [10, 20, 50, 100, 500, 1000, 2000, 5000]
+__range_nb_plonges = [10, 20, 50, 100, 200, 300, 500, 1000, 2000]
 __emoji_corresp = ["<:crevette:1073737219019378718>", "<:meduse:1073737211322847313>",
-                   "<:tortue:1073737202007294002>", "<:homard:1073737215848501248>",
-                   "<:phoque:1073737206956556328>", "<:requin:1073737803881513010>",
-                   "<:orque:1073737194461733035>", "❓"]
+                   "<:homard:1073737215848501248>", "<:tortue:1073737202007294002>",
+                   "<:poisson_clown:1088490620047331348>", "<:phoque:1073737206956556328>",
+                   "<:dauphin:1088490925124223076>", "<:requin:1073737803881513010>",
+                   "<:orque:1073737194461733035>"]
+
 
 NOMBRE_PLONGEES: list[discord.SelectOption] = [
     discord.SelectOption (

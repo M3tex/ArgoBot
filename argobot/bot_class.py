@@ -74,3 +74,9 @@ class ArgoBot(discord.Bot):
         
         self.settings['bot-settings']['is_cards_locked'] = 'False'
         self.__update_settings_file()
+
+
+
+    async def arret(self, user: discord.Member):
+        print(f"\nBot arrêté par {user.nick}\n")
+        await self.close()

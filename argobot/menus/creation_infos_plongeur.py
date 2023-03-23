@@ -17,8 +17,6 @@ from plongeur import Plongeur
 
 ### Premier Menu à Choix Multiples
 class MenuCM1(discord.ui.View):
-    opt_niveaux: list[discord.SelectOption] = []
-
     def __init__(self, plongeur: Plongeur):
         # Pour récupérer les choix. TODO: Voir si on peut faire mieux
         self.plongeur = plongeur
@@ -75,7 +73,7 @@ class MenuHelp(discord.ui.View):
 
 class MenuText(discord.ui.Modal):
     def __init__(self, plongeur: Plongeur):
-        super().__init__(title = "Petit Questionnaire")
+        super().__init__(title = "Dernières questions")
         listItems = [PseudoInput(), RegionInput(), DescriptionInput()]
 
         for it in listItems:
@@ -124,22 +122,35 @@ class FederationSelect(discord.ui.Select):
     # Override de la méthode callback (appelée après une intéraction)
     async def callback(self, interaction: discord.Interaction):
         fede_selected = self.values
+        opt_niveaux = []
+        already_selected = []
+
+        for fede in fede_selected:
+            opt_niveaux += [el for el in options.NIVEAUX 
+                            if el.value.split(':')[1] == fede and el.value.split(':')[0] not in already_selected]
+            
+            already_selected += [el.value.split(':')[0] for el in options.NIVEAUX 
+                                 if el.value.split(':')[1] == fede]
 
         # 0 est l'id de la FFESSM. TODO: trouver + lisible ?   
-        if "0" in fede_selected:
-            self.view.opt_niveaux += [el for el in options.NIVEAUX_FFESSM if el not in self.view.opt_niveaux]
+        # if "0" in fede_selected:
+        #     opt_niveaux += [el for el in options.NIVEAUX_FFESSM if el not in opt_niveaux]
         
-        # 1 est l'id de PADI
-        if "1" in fede_selected:
-            self.view.opt_niveaux += [el for el in options.NIVEAUX_PADI if el not in self.view.opt_niveaux]
+        # # 1 est l'id de PADI
+        # if "1" in fede_selected:
+        #     opt_niveaux += [el for el in options.NIVEAUX_PADI if el not in opt_niveaux]
 
-        # 2 est l'id de SSI
-        if "2" in fede_selected:
-            self.view.opt_niveaux += [el for el in options.NIVEAUX_SSI if el not in self.view.opt_niveaux]
+        # # 2 est l'id de SSI
+        # if "2" in fede_selected:
+        #     opt_niveaux += [el for el in options.NIVEAUX_SSI if el not in opt_niveaux]
+        
+        # # 3 est l'id de l'ANMP
+        # if "3" in fede_selected:
+        #     opt_niveaux += [el for el in options.NIVEAUX_ANMP if el not in opt_niveaux]
 
 
         self.view.plongeur.federations = [int(id) for id in fede_selected]
-        self.view.add_item(NiveauSelect(self.view.opt_niveaux))
+        self.view.add_item(NiveauSelect(opt_niveaux))
         self.disabled = True
         await interaction.response.edit_message(view=self.view)
 
@@ -158,7 +169,7 @@ class NiveauSelect(discord.ui.Select):
 
     # Override de la méthode callback (appelée après une intéraction)    
     async def callback(self, interaction: discord.Interaction):
-        self.view.plongeur.niveaux = [int(id) for id in self.values]
+        self.view.plongeur.niveaux = [int(id.split(':')[0]) for id in self.values]
         await interaction.response.defer()
 
 
@@ -367,7 +378,6 @@ class ResetButton(discord.ui.Button):
 
     # On fait 2 méthodes de callback: 1 pour chaque menu
     async def callback_menu1(self, interaction: discord.Interaction, content = messages.MENU_1):
-        self.view.opt_niveaux = []
         self.view.enable_all_items()
         tmp = self.view.get_item("niveaux")
         if tmp:
