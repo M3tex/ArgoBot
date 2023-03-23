@@ -17,8 +17,6 @@ from plongeur import Plongeur
 
 ### Premier Menu à Choix Multiples
 class MenuCM1(discord.ui.View):
-    opt_niveaux: list[discord.SelectOption] = []
-
     def __init__(self, plongeur: Plongeur):
         # Pour récupérer les choix. TODO: Voir si on peut faire mieux
         self.plongeur = plongeur
@@ -124,22 +122,22 @@ class FederationSelect(discord.ui.Select):
     # Override de la méthode callback (appelée après une intéraction)
     async def callback(self, interaction: discord.Interaction):
         fede_selected = self.values
-
+        opt_niveaux = []
         # 0 est l'id de la FFESSM. TODO: trouver + lisible ?   
         if "0" in fede_selected:
-            self.view.opt_niveaux += [el for el in options.NIVEAUX_FFESSM if el not in self.view.opt_niveaux]
+            opt_niveaux += [el for el in options.NIVEAUX_FFESSM if el not in opt_niveaux]
         
         # 1 est l'id de PADI
         if "1" in fede_selected:
-            self.view.opt_niveaux += [el for el in options.NIVEAUX_PADI if el not in self.view.opt_niveaux]
+            opt_niveaux += [el for el in options.NIVEAUX_PADI if el not in opt_niveaux]
 
         # 2 est l'id de SSI
         if "2" in fede_selected:
-            self.view.opt_niveaux += [el for el in options.NIVEAUX_SSI if el not in self.view.opt_niveaux]
+            opt_niveaux += [el for el in options.NIVEAUX_SSI if el not in opt_niveaux]
 
 
         self.view.plongeur.federations = [int(id) for id in fede_selected]
-        self.view.add_item(NiveauSelect(self.view.opt_niveaux))
+        self.view.add_item(NiveauSelect(opt_niveaux))
         self.disabled = True
         await interaction.response.edit_message(view=self.view)
 
@@ -367,7 +365,6 @@ class ResetButton(discord.ui.Button):
 
     # On fait 2 méthodes de callback: 1 pour chaque menu
     async def callback_menu1(self, interaction: discord.Interaction, content = messages.MENU_1):
-        self.view.opt_niveaux = []
         self.view.enable_all_items()
         tmp = self.view.get_item("niveaux")
         if tmp:
