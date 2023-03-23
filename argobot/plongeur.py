@@ -67,11 +67,11 @@ class Plongeur():
         
         niveau = "ERROR"
         for n in (options.NIVEAUX_FFESSM + options.NIVEAUX_PADI + options.NIVEAUX_SSI):
-            if n.value == str(self.niveaux[0]):
+            if n.value.split(':')[0] == str(self.niveaux[0]):
                 niveau = n.label
         
-        niveauToAnimal = {'10': "Crevette", '20': "Méduse", '50': "Tortue", '100': "Homard",
-                          '500': "Phoque", '1000': "Requin", '2000': "Orque", '5000': "Mégalodon"}
+        niveauToAnimal = {10: "Crevette", 20: "Méduse", 50: "Homard", 100: "Tortue", 200: "Poisson Clown",
+                          300: "Phoque", 500: "Dauphin", 1000: "Requin", 2000: "Orque", 5000: "Mégalodon"}
 
         # Supression d'éventuels emoji
         new_str = ""
@@ -89,7 +89,7 @@ class Plongeur():
         
 
         with io.BytesIO() as b_img:
-            create_diver_card(self.prenom, self.region, fede, niveau, niveauToAnimal[str(self.nombre_plongee)], b_img)
+            create_diver_card(self.prenom, self.region, fede, niveau, niveauToAnimal[self.nombre_plongee], b_img)
             b_img.seek(0)
 
             await ctx.respond(file=discord.File(fp=b_img, filename=f"{self.prenom}.jpg"), ephemeral=True)
