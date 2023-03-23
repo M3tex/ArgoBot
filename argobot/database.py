@@ -64,8 +64,21 @@ async def remplissage(conn: aiosqlite.Connection):
     await cur.executemany(fede, data)
 
     # Pour les niveaux
-    # TODO: Passer par les options pour permettre de rajouter des niveaux facilement
-    await cur.executescript(sql_request.REMPLISSAGE_NIVEAUX)
+    niveau = "INSERT OR IGNORE INTO Niveau (idNiveau, nomNiveau, profondeurMaxAutonomie) VALUES (?, ?, ?)"
+    data = []
+
+    # Lien fédé / niveau
+    niv_fede = "INSERT OR IGNORE INTO FederationPossedeNiveau (idFederation, idNiveau) VALUES (?, ?)"
+    data2 = []
+    
+    for niv in options.NIVEAUX:
+        val = niv.value.split(':')
+        data.append((int(val[0]), niv.label, int(val[2])))
+
+        data2.append((int(val[1]), int(val[0])))
+    
+    await cur.executemany(niveau, data)
+    await cur.executemany(niv_fede, data2)
 
     # Insertion dans intérêts:
     interets = "INSERT OR IGNORE INTO Interet (idInteret, nomInteret) VALUES (?, ?)"
@@ -84,3 +97,4 @@ async def remplissage(conn: aiosqlite.Connection):
     
     await conn.commit()
     await cur.close()
+

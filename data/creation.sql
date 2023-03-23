@@ -26,9 +26,9 @@ CREATE TABLE IF NOT EXISTS Niveau (
     idNiveau INT PRIMARY KEY,
     nomNiveau VARCHAR(50) NOT NULL,
     nomCourtNiveau VARCHAR(20) NOT NULL,
-    profondeurMaxAutonomie INT NOT NULL,
-    idFederation INT REFERENCES Federation
+    profondeurMaxAutonomie INT NOT NULL
 );
+
 
 
 CREATE TABLE IF NOT EXISTS Interet (
@@ -50,6 +50,14 @@ CREATE TABLE IF NOT EXISTS ActivitePro (
 
 
 -- Liens n:m
+CREATE TABLE IF NOT EXISTS FederationPossedeNiveau (
+    idFederation REFERENCES Federation,
+    idNiveau REFERENCES Niveau,
+
+    PRIMARY KEY(idFederation, idNiveau)
+);
+
+
 CREATE TABLE IF NOT EXISTS PlongeurAffilieAFederation (
     idPlongeur REFERENCES Plongeur,
     idFederation REFERENCES Federation,
