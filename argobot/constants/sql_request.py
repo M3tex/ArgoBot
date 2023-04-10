@@ -1,23 +1,3 @@
-# TODO: Le passer en auto depuis constants.select_options comme les autres
-# ! Aucun niveau pour SSI pour l'instant (car les mêmes que PADI)
-# Voir si il y a des niveaux spécifiques à PADI
-REMPLISSAGE_NIVEAUX = """
-INSERT OR IGNORE INTO Niveau (idNiveau, nomNiveau, nomCourtNiveau, profondeurMaxAutonomie, idFederation)
-VALUES 
-    (0, 'Niveau 1', 'N1', 0, 0),
-    (1, 'Niveau 2', 'N2', 20, 0),
-    (2, 'Niveau 3', 'N3', 60, 0), 
-    (3, 'Niveau 4', 'N4', 60, 0),
-    (4, 'Niveau 5', 'N5', 60, 0),
-    (5, 'Open Water Diver', 'Open Water', 18, 1),
-    (6, 'Adventure Diver', 'Adventure Diver', 18, 1),
-    (7, 'Advanced Open Water', 'Advanced Diver', 30, 1),
-    (8, 'Deep Diver', 'Deep Diver', 40, 1),
-    (9, 'Dive Master', 'Dive Master', 40, 1),
-    (10, 'Instructor', 'Instructor', 40, 1);
-"""
-
-
 INSERT_PLONGEUR = """
 INSERT INTO Plongeur (idPlongeur, prenom, nombrePlongee, region, description, pratique, consent)
 VALUES (:idPlongeur, :prenom, :nombrePlongees, :region, :description, :pratique, :consent);
