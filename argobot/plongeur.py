@@ -197,6 +197,6 @@ class Plongeur():
         deuxième menu sont *toutes* renseignées, False sinon
         """
         if 1 in self.pratique:  # Si le plongeur est professionnel on prend en compte la profession
-            return self.pratique and self.interets and self.profession and self.search_consent
+            return self.pratique and self.interets and self.profession
 
-        return self.pratique and self.interets and self.search_consent
+        return self.pratique and self.interets
