@@ -1,23 +1,3 @@
-# TODO: Le passer en auto depuis constants.select_options comme les autres
-# ! Aucun niveau pour SSI pour l'instant (car les mêmes que PADI)
-# Voir si il y a des niveaux spécifiques à PADI
-REMPLISSAGE_NIVEAUX = """
-INSERT OR IGNORE INTO Niveau (idNiveau, nomNiveau, nomCourtNiveau, profondeurMaxAutonomie, idFederation)
-VALUES 
-    (0, 'Niveau 1', 'N1', 0, 0),
-    (1, 'Niveau 2', 'N2', 20, 0),
-    (2, 'Niveau 3', 'N3', 60, 0), 
-    (3, 'Niveau 4', 'N4', 60, 0),
-    (4, 'Niveau 5', 'N5', 60, 0),
-    (5, 'Open Water Diver', 'Open Water', 18, 1),
-    (6, 'Adventure Diver', 'Adventure Diver', 18, 1),
-    (7, 'Advanced Open Water', 'Advanced Diver', 30, 1),
-    (8, 'Deep Diver', 'Deep Diver', 40, 1),
-    (9, 'Dive Master', 'Dive Master', 40, 1),
-    (10, 'Instructor', 'Instructor', 40, 1);
-"""
-
-
 INSERT_PLONGEUR = """
 INSERT INTO Plongeur (idPlongeur, prenom, nombrePlongee, region, description, pratique, consent)
 VALUES (:idPlongeur, :prenom, :nombrePlongees, :region, :description, :pratique, :consent);
@@ -94,6 +74,51 @@ SELECT idActivitePro FROM PlongeurTravailleDansActivitePro WHERE idPlongeur = ?"
 
 SELECT_REQUESTS = [SELECT_PLONGEURFEDE, SELECT_PLONGEURNIVEAU, SELECT_PLONGEURINTERET, SELECT_PLONGEURSPECIALITE, SELECT_PLONGEURACTIVITE]
 
+
+
+
+# On se permet de formatter car les idPlongeur ne sont pas saisis par les utilisateurs
+# donc pas d'injection possible.
+# (entiers non signés sur 64 bits déterminés automatiquement par Discord)
+
+SELECT_SIGLE_FEDE = """
+SELECT sigleFederation 
+FROM Federation F, PlongeurAffilieAFederation PF
+WHERE PF.idPlongeur = {}
+AND F.idFederation = PF.idFederation;
+"""
+
+
+SELECT_NOM_NIVEAU = """
+SELECT nomNiveau 
+FROM Niveau N, PlongeurPossedeNiveau PN
+WHERE PN.idPlongeur = {}
+AND N.idNiveau = PN.idNiveau;
+"""
+
+
+SELECT_NOM_SPECIALITE = """
+SELECT nomSpecialite
+FROM Specialite S, PlongeurPossedeSpecialite PS
+WHERE PS.idPlongeur = {}
+AND PS.idSpecialite = S.idSpecialite;
+"""
+
+
+SELECT_NOM_INTERET = """
+SELECT nomInteret
+FROM Interet I, PlongeurPossedeInteret PI
+WHERE PI.idPlongeur = {}
+AND PI.idInteret = I.idInteret;
+"""
+
+
+SELECT_NOM_ACTIVITE_PRO = """
+SELECT nomActivitePro
+FROM ActivitePro AP, PlongeurTravailleDansActivitePro PTA
+WHERE PTA.idPlongeur = {}
+AND PTA.idActivitePro = AP.idActivitePro;
+"""
 
 
 COUNT_PLONGEUR = """

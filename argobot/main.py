@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
     # Date de dernier lancement du bot
     try:
-        last_launched = os.path.getmtime(PATH + "logs/dicord.log")
+        last_launched = os.path.getmtime(PATH + "pid")
     except:
         last_launched = 0
     

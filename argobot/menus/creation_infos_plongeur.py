@@ -22,7 +22,7 @@ class MenuCM1(discord.ui.View):
         self.plongeur = plongeur
 
         listItems = [FederationSelect(), NombrePlongeeSelect(), SpecialitesSelect(),
-                     SuivantButton(menu = 1), ResetButton(menu = 1), StopButton()]
+                      StopButton(), ResetButton(menu = 1), SuivantButton(menu = 1)]
         
 
         super().__init__()
@@ -331,11 +331,11 @@ class SuivantButton(discord.ui.Button):
             # TODO: Trouver une manière + propre que de passer par le callback du reset ?
             await self.view.get_item("rst_button").callback_menu1 (
                 interaction,
-                content = messages.CREATION_INCOMPLET + messages.MENU_1
+                content = messages.CREATION_INCOMPLET + messages.CREATION_MENU_1
             )
         else:
             await interaction.response.edit_message (
-                content = messages.MENU_2,
+                content = messages.CREATION_MENU_2,
                 view=MenuCM2(self.view.plongeur)
             )
 
@@ -347,7 +347,7 @@ class SuivantButton(discord.ui.Button):
         if not plongeur.menu2_est_complet():
             await self.view.get_item("rst_button").callback_menu2 (
                 interaction,
-                content = messages.CREATION_INCOMPLET + messages.MENU_2
+                content = messages.CREATION_INCOMPLET + messages.CREATION_MENU_2
             )
         else:
             await interaction.response.send_modal(MenuText(self.view.plongeur))
@@ -377,7 +377,7 @@ class ResetButton(discord.ui.Button):
         self.menu = menu
 
     # On fait 2 méthodes de callback: 1 pour chaque menu
-    async def callback_menu1(self, interaction: discord.Interaction, content = messages.MENU_1):
+    async def callback_menu1(self, interaction: discord.Interaction, content = messages.CREATION_MENU_1):
         self.view.enable_all_items()
         tmp = self.view.get_item("niveaux")
         if tmp:
@@ -386,7 +386,7 @@ class ResetButton(discord.ui.Button):
         await interaction.response.edit_message(content = content, view=self.view)
 
 
-    async def callback_menu2(self, interaction: discord.Interaction, content = messages.MENU_1):
+    async def callback_menu2(self, interaction: discord.Interaction, content = messages.CREATION_MENU_1):
         self.view.enable_all_items()
         tmp = self.view.get_item("professions")
         if tmp:

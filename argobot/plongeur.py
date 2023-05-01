@@ -56,10 +56,12 @@ class Plongeur():
 
 
     async def envoi_carte(self, ctx: discord.ApplicationContext):
-        """Envoie la carte du plongeur.
-        
+        """
+        Envoie la carte du plongeur.
+
         La carte est seulement visible de la personne qui a réalisé la commande,
-        et chaque personne ne peut accéder qu'à SA carte de plongeur. """
+        et chaque personne ne peut accéder qu'à SA carte de plongeur.
+        """
         fede = "ERROR"
         for f in options.FEDERATIONS:
             if f.value == str(self.federations[0]):
@@ -98,9 +100,10 @@ class Plongeur():
 
 
     async def load_from_db(self):
-        """Charge les données depuis la base de donnée au lieu de les demander via le menu.
-        
-        Si le plongeur n'est pas dans la base de données, retourne None"""
+        """
+        Charge les données depuis la base de donnée au lieu de les demander via le menu.
+        Si le plongeur n'est pas dans la base de données, retourne None
+        """
         if not await self.est_dans_db():
             return None
         
@@ -111,13 +114,13 @@ class Plongeur():
         id = self.user.id
 
         # Données table plongeur
-        plongeur = await (await cur.execute(sql_request.SELECT_PLONGEUR, (id, ))).fetchall()
-        self.prenom = plongeur[0][1]
-        self.nombre_plongee = plongeur[0][2]
-        self.region = plongeur[0][3]
-        self.description = plongeur[0][4]
-        self.pratique = [0, 1] if plongeur[0][5] == 2 else [plongeur[0][5]]
-        self.search_consent = bool(plongeur[0][6])
+        plongeur = (await (await cur.execute(sql_request.SELECT_PLONGEUR, (id, ))).fetchall())[0]
+        self.prenom = plongeur[1]
+        self.nombre_plongee = plongeur[2]
+        self.region = plongeur[3]
+        self.description = plongeur[4]
+        self.pratique = [0, 1] if plongeur[5] == 2 else [plongeur[5]]
+        self.search_consent = bool(plongeur[6])
 
 
         # Autres tables
@@ -135,10 +138,12 @@ class Plongeur():
 
 
     async def to_db(self):
-        """Insère le plongeur dans la base de données (ou met à jour les informations s'il
+        """
+        Insère le plongeur dans la base de données (ou met à jour les informations s'il
         est déjà dedans).
-        
-        On utilise l'identifiant Discord (entier sur 18 chiffres) comme identifiant d'un utilisateur"""
+        On utilise l'identifiant Discord (entier non signé sur 64 bits) comme identifiant d'un 
+        utilisateur
+        """
         conn = await database.connexion()
         cur = await conn.cursor()
 
@@ -171,7 +176,7 @@ class Plongeur():
         await conn.close()
     
 
-
+    # todo: remettre au bon endroit (menu de creation)
     def reset_menu1(self):
         self.federations = []
         self.niveaux = []
@@ -187,16 +192,18 @@ class Plongeur():
     
 
     def menu1_est_complet(self):
-        """Retourne True si les informations demandées dans le
+        """
+        Retourne True si les informations demandées dans le
         premier menu sont *toutes* renseignées, False sinon
         """
         return self.federations and self.niveaux and self.nombre_plongee and self.specialites
 
     def menu2_est_complet(self):
-        """Retourne True si les informations demandées dans le
+        """
+        Retourne True si les informations demandées dans le
         deuxième menu sont *toutes* renseignées, False sinon
         """
         if 1 in self.pratique:  # Si le plongeur est professionnel on prend en compte la profession
-            return self.pratique and self.interets and self.profession and self.search_consent
+            return self.pratique and self.interets and self.profession
 
-        return self.pratique and self.interets and self.search_consent
+        return self.pratique and self.interets
