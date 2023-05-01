@@ -22,6 +22,7 @@ class ArgoBot(discord.Bot):
 
         self.load_extension('cogs.infos_plongeur')
         self.load_extension('cogs.admin')
+        self.load_extension('cogs.general')
 
 
         # On récupère les données contenues dans le fichier de configuration
@@ -78,5 +79,5 @@ class ArgoBot(discord.Bot):
 
 
     async def arret(self, user: discord.Member):
-        print(f"\nBot arrêté par {user.nick}\n")
+        print(f"\nBot arrêté par {user.nick}")
         await self.close()
