@@ -1,7 +1,14 @@
+"""
+Contient les messages utilisés dans les réponses du bot (aide pour les menus,
+messages d'erreur, messages de confirmation etc.)
+
+La syntaxe est celle utilisée par Discord pour formatter les messages.
+https://support.discord.com/hc/en-us/articles/210298617-Markdown-Text-101-Chat-Formatting-Bold-Italic-Underline-
+"""
 
 
 
-MENU_1 = """
+CREATION_MENU_1 = """
 :pencil: Remplis tes informations de plongeur !
 
 **Attention**: La **1ère fédération sélectionnée** sera celle affiché sur ta carte !
@@ -10,7 +17,8 @@ MENU_1 = """
 De même pour les niveaux.
 """
 
-MENU_2 = """
+
+CREATION_MENU_2 = """
 :pencil: Remplis tes informations de plongeur !
 
 Le champ "Rendre mes données publiques" concerne la fonction de recherche de binômes
@@ -136,4 +144,50 @@ STATS_PLONGEUR_FEDE = """
 - Il y a `{ssi_count}` plongeurs affiliés à SSI (`{ssi_percentage:.2f}%`)
 
 *Notez qu'un plongeur peut-être affilié à plusieurs fédérations*
+"""
+
+
+RECHERCHE_BINOME = """
+Bienvenue dans le menu de **recherche de binôme** :mag: !
+
+Chaque page du menu vous permettra de filtrer le résultat par critères.
+Vous pourrez changer l'opérateur indépendamment pour chaque critère.
+
+Les opérateurs:
+**ET**: Seuls les plongeurs possédant **tous** les crtitères sélectionnés seront dans les résultats.
+**OU**: Seuls les plongeurs possédant **au moins 1** des critères sélectionnés seront dans les résultats.
+
+*Par exemple:
+Je sélectionne les fédérations PADI et FFESSM.
+Si je choisis le **ET**, seulement les plongeurs affiliés à la fois à PADI **et** à la FFESSM seront présents dans les résultats.
+Si je choisis le **OU**, les plongeurs affiliés à PADI **ou** à la FFESSM seront présents.*"""
+
+
+RECHERCHE_RESULTS = """
+Voici les résultats de votre recherche
+
+Il y a `{nb}` plongeurs correspondant à vos critères"""
+
+
+RECHERCHE_CONTACT = """
+Vous pouvez contacter {name} en cliquant ici **→** <@{id}>.
+Il vous suffit alors d'appuyer sur "Envoyer un message" et d'écrire un message sympa :incoming_envelope:"""
+
+
+
+RGPD = """
+Lorsque vous utilisez la commande `/infos_plongeur création`, les données que vous renseignez sont stockées dans une base de données.
+Le regroupement des informations renseignées (prénom ou pseudo, région, fédération, niveaux, etc.) pourrait être considéré comme indirectement identifiant, et on pourrait alors parler de données personnelles.
+
+Les informations stockées se limitent à celles que vous renseignerez dans le menu de création, ainsi que votre identifiant Discord (un entier non signé sur 64bits). Pour voir la liste complète des données stockées, vous pouvez utiliser la commande `/infos_plongeur aide` puis `création`.
+
+**→** Si vous souhaitez accéder à ce qui est stocké sur vous dans la base de donnée, cliquez sur le bouton correspondant ci-dessous.
+**→** Si vous souhaitez modifier vos informations, ré-utilisez la commande `/infos_plongeur création`
+**→** Si vous souhaitez supprimer vos informations de la base de données, utilisez la commande `/infos_plongeur suppression`
+
+Ces données sont en libre accès pour **tous** les membres de ce serveur Discord (via la fonction de recherche de binôme), sauf si vous avez refusé d'apparaître dans les résultats de recherche (dans ce cas notez toutefois que les administrateurs y ont accès)
+
+Ces données sont susceptibles d'être utilisées pour réaliser des statistiques anonymisées (du style: `Il y a 47% de plongeurs affiliés à la FFESSM dans le serveur`).
+
+**Aucune** de ces données n'est utilisée dans un contexte extérieur au serveur Discord
 """

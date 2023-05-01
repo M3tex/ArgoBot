@@ -7,7 +7,6 @@ from bot_class import ArgoBot
 from discord.ext.commands import Cog
 
 
-
 # CoG -> Command Groups
 # ? Doc: https://guide.pycord.dev/popular-topics/cogs
 
@@ -61,7 +60,7 @@ class InfosPlongeur(Cog):
         plongeur = Plongeur(ctx.author)
         view = menus.MenuCM1(plongeur)
         
-        await ctx.respond(messages.MENU_1, view=view, ephemeral=True)
+        await ctx.respond(messages.CREATION_MENU_1, view=view, ephemeral=True)
         return
 
 

@@ -371,3 +371,32 @@ HELP_PLONGEURID: list[discord.SelectOption] = [
         description = "Affiche l'aide pour la commande carte"
     )
 ]
+
+
+# ---------- Recherche de binôme ---------- #
+
+AUCUN_CRITERE = discord.SelectOption(
+    label="Aucun",
+    description="Ce critère n'est pas pertinent dans ma recherche"
+)
+
+CRITERE2OPTIONS = {
+    "Federation": [AUCUN_CRITERE] + FEDERATIONS.copy(),
+    "Niveau": [AUCUN_CRITERE] + NIVEAUX.copy(),
+    "Specialite": [AUCUN_CRITERE] + SPECIALITES.copy(),
+    "Interet": [AUCUN_CRITERE] + INTERETS.copy()
+}
+
+
+OPERATEURS: list[discord.SelectOption] = [
+    discord.SelectOption(
+        label="ET",
+        description="Les plongeurs ayant TOUS les critères sélectionnés ci-dessous",
+        value="AND"
+    ),
+    discord.SelectOption(
+        label="OU",
+        description="Les plongeurs ayant AU MOINS 1 des critères sélectionnés ci-dessous",
+        value="OR"
+    )
+]
