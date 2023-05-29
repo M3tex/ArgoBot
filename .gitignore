@@ -2,8 +2,10 @@ __pycache__
 .vscode
 logs/
 pid
-start.sh
-stop.sh
+
+stop
+start
+restart
 
 # .env contient le token du bot qui doit absolument rester privé
 .env
@@ -12,6 +14,6 @@ stop.sh
 resources
 
 # La base de données
-data/database.db
+data/*.db
 
 test.py

@@ -3,7 +3,7 @@
 
 -- Entités
 CREATE TABLE IF NOT EXISTS Plongeur (
-    -- Car id Discord sur 18 chiffres, log10(MAX_UBIGINT) ~= 19
+    -- Car id Discord sur 64 bits
     idPlongeur UNISGNED BIG INT PRIMARY KEY,   
     prenom VARCHAR(50) NOT NULL,
     nombrePlongee INT NOT NULL,
@@ -14,87 +14,93 @@ CREATE TABLE IF NOT EXISTS Plongeur (
 );
 
 
--- ! Pour PADI et SSI si les niveaux sont exactement les mêmes
 CREATE TABLE IF NOT EXISTS Federation (
-    idFederation INT PRIMARY KEY,
-    sigleFederation VARCHAR(20),
-    nomCompletFederation VARCHAR(100)
+    idFederation INTEGER PRIMARY KEY,
+    nomFederation VARCHAR(20),
+    descriptionFederation VARCHAR(100)
 );
 
 
 CREATE TABLE IF NOT EXISTS Niveau (
-    idNiveau INT PRIMARY KEY,
+    idNiveau INTEGER PRIMARY KEY,
     nomNiveau VARCHAR(50) NOT NULL,
-    nomCourtNiveau VARCHAR(20) NOT NULL,
-    profondeurMaxAutonomie INT NOT NULL
+    profondeurMaxAutonomie INT NOT NULL,
+    descriptionNiveau TEXT,
+
+    -- Pour "trier" les niveaux: N3 > N1, N3 > Open Water, etc.
+    -- en flottant pour si besoin de subtilité / ajustements
+    rang REAL NOT NULL
 );
 
 
 
 CREATE TABLE IF NOT EXISTS Interet (
-    idInteret INT PRIMARY KEY,
-    nomInteret VARCHAR(50) NOT NULL
+    idInteret INTEGER PRIMARY KEY,
+    nomInteret VARCHAR(50) NOT NULL,
+    descriptionInteret TEXT
 );
 
 
 CREATE TABLE IF NOT EXISTS Specialite (
-    idSpecialite INT PRIMARY KEY,
-    nomSpecialite VARCHAR(50) NOT NULL
+    idSpecialite INTEGER PRIMARY KEY,
+    nomSpecialite VARCHAR(50) NOT NULL,
+    descriptionSpecialite TEXT
 );
 
 
-CREATE TABLE IF NOT EXISTS ActivitePro (
-    idActivitePro INT PRIMARY KEY,
-    nomActivitePro VARCHAR(50) NOT NULL
+CREATE TABLE IF NOT EXISTS Profession (
+    idProfession INTEGER PRIMARY KEY,
+    nomProfession VARCHAR(50) NOT NULL,
+    descriptionProfession TEXT
 );
 
 
 -- Liens n:m
 CREATE TABLE IF NOT EXISTS FederationPossedeNiveau (
-    idFederation REFERENCES Federation,
-    idNiveau REFERENCES Niveau,
+    idFederation REFERENCES Federation ON DELETE CASCADE,
+    idNiveau REFERENCES Niveau ON DELETE CASCADE,
 
     PRIMARY KEY(idFederation, idNiveau)
 );
 
 
-CREATE TABLE IF NOT EXISTS PlongeurAffilieAFederation (
-    idPlongeur REFERENCES Plongeur,
-    idFederation REFERENCES Federation,
+CREATE TABLE IF NOT EXISTS PlongeurPossedeFederation (
+    idPlongeur REFERENCES Plongeur ON DELETE CASCADE,
+    idFederation REFERENCES Federation ON DELETE CASCADE,
 
     PRIMARY KEY(idPlongeur, idFederation)
 );
 
 
 CREATE TABLE IF NOT EXISTS PlongeurPossedeNiveau (
-    idPlongeur REFERENCES Plongeur,
-    idNiveau REFERENCES Niveau,
+    idPlongeur REFERENCES Plongeur ON DELETE CASCADE,
+    idNiveau REFERENCES Niveau ON DELETE CASCADE,
 
     PRIMARY KEY(idPlongeur, idNiveau)
 );
 
 
 CREATE TABLE IF NOT EXISTS PlongeurPossedeInteret (
-    idPlongeur REFERENCES Plongeur,
-    idInteret REFERENCES Interet,
+    idPlongeur REFERENCES Plongeur ON DELETE CASCADE,
+    idInteret REFERENCES Interet ON DELETE CASCADE,
 
     PRIMARY KEY(idPlongeur, idInteret)
 );
 
 
 CREATE TABLE IF NOT EXISTS PlongeurPossedeSpecialite (
-    idPlongeur REFERENCES Plongeur,
-    idSpecialite REFERENCES Specialite,
+    idPlongeur REFERENCES Plongeur ON DELETE CASCADE,
+    idSpecialite REFERENCES Specialite ON DELETE CASCADE,
 
     PRIMARY KEY(idPlongeur, idSpecialite)
 );
 
 
-CREATE TABLE IF NOT EXISTS PlongeurTravailleDansActivitePro (
-    idPlongeur REFERENCES Plongeur,
-    idActivitePro REFERENCES ActivitePro,
+CREATE TABLE IF NOT EXISTS PlongeurPossedeProfession (
+    idPlongeur REFERENCES Plongeur ON DELETE CASCADE,
+    idProfession REFERENCES Profession ON DELETE CASCADE,
 
-    PRIMARY KEY(idPlongeur, idActivitePro)
+    PRIMARY KEY(idPlongeur, idProfession)
 );
 
 /*

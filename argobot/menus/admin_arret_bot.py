@@ -35,7 +35,7 @@ class ConfirmationButton(discord.ui.Button):
     view: MenuArretBot
     def __init__(self):
         super().__init__(
-            label = "ARRÊTER LE BOT",
+            label = "Arrêter le bot",
             style = discord.ButtonStyle.danger,
             row = 0
         )

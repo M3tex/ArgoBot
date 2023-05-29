@@ -1,10 +1,6 @@
 import discord
 from bot_class import ArgoBot
 import constants.messages as messages
-import constants.sql_request as requests
-from discord.ext.pages import Paginator, Page
-from database import connexion
-from constants.embeds import EmbedStatPlongeur
 
 
 
@@ -119,6 +115,4 @@ class StatsPlongeur(discord.ui.Button):
 
     
     async def callback(self, interaction: discord.Interaction):
-        embed = EmbedStatPlongeur()
-        await embed.set_stats()
-        await interaction.response.edit_message(view = None, embed = embed)
+        await interaction.response.edit_message(content="Maintenance...")

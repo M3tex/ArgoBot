@@ -1,11 +1,9 @@
 import discord
-import constants.select_options as options
-import constants.messages as messages
 import database
-from constants.embeds import EmbedPlongeur
 from menus.recherche_results import SearchResults
 from bot_class import ArgoBot
-
+from plongeur import Plongeur
+from globals import CONSTANTES
 
 
 
@@ -81,7 +79,7 @@ class OperatorSelect(discord.ui.Select):
             placeholder="Opérateur",
             min_values=1,
             max_values=1,
-            options=options.OPERATEURS
+            options=CONSTANTES.select_options.OPERATEURS
         )
     
 
@@ -97,7 +95,15 @@ class CritereSelect(discord.ui.Select):
 
     def __init__(self, critere: str):
         # On récupère les options dépendantes du critère
-        opt = options.CRITERE2OPTIONS.get(critere, None)
+        critere_aucun = CONSTANTES.select_options.AUCUN_CRITERE
+        CRITERE2OPTIONS = {
+            "Federation": [critere_aucun] + CONSTANTES.select_options.FEDERATIONS.copy(),
+            "Niveau": [critere_aucun] + CONSTANTES.select_options.NIVEAUX.copy(),
+            "Specialite": [critere_aucun] + CONSTANTES.select_options.SPECIALITES.copy(),
+            "Interet": [critere_aucun] + CONSTANTES.select_options.INTERETS.copy()
+        }
+
+        opt = CRITERE2OPTIONS.get(critere, None)
         if opt == None:
             print("Erreur de clé lors de la création du menu de sélection de critère")
             print(f"Clé: {critere}")
@@ -124,7 +130,7 @@ class CritereSelect(discord.ui.Select):
 
     
     async def callback(self, interaction: discord.Interaction):
-        self.view.crit2list[self.critere] = None if "Aucun" in self.values else [val.split(':')[0] for val in self.values]
+        self.view.crit2list[self.critere] = None if "Aucun" in self.values else [int(val) for val in self.values]
 
         await interaction.response.defer()
 
@@ -191,30 +197,27 @@ class SuivantButton(discord.ui.Button):
     async def callback(self, interaction: discord.Interaction):
         # On génère la requête SQL permettant d'obtenir l'ensemble des 
         # plongeurs matchant avec le critère
-        table = "PlongeurPossede" + self.critere if self.critere != "Federation" else "PlongeurAffilieAFederation"
+        table = "PlongeurPossede" + self.critere
         request = f"SELECT idPlongeur FROM {table} "
         op = "WHERE"    # Pour le premier
 
         values = self.view.crit2list[self.critere]
+        guild = interaction.guild
+        bot = interaction.client
+        msg = interaction.message
 
         # todo: voir si moyen simple de faire des requêtes moins longues
 
-        # si "Aucun" est sélectionné, rien à faire on passe à la page suivante
+        # si "Aucun" est sélectionné (i.e le critère n'est pas pertinent) alors
+        # rien à faire on passe à la page suivante
         if values != None:
             # On vérifie que tout ait été saisit.
             # Si un seul critère choisit, pas besoin d'opérateur
             if not values or (not self.view.operator and len(values) != 1):
-                await interaction.response.edit_message(content=messages.CREATION_INCOMPLET, view=self.view)
+                await interaction.response.edit_message(content=CONSTANTES.messages.CREATION_INCOMPLET, view=self.view)
                 return
         
-            for val in values:
-                # Pour les niveaux car les values sont au format:
-                # idNiveau:idFede:profMaxAutonomie.
-                #
-                # Si ça n'est pas un niveau l'id sera bien dans le 1er élément
-                # car pas de ':' donc dans ce cas val.split(':')[0] = val
-                id = val.split(':')[0]
-
+            for id in values:
                 # On se permet de formater les valeurs directement car rien de ce qui est formatté
                 # n'est modifiable / saisit par les utilisateurs
                 request += f"{op} idPlongeur IN "
@@ -237,29 +240,50 @@ class SuivantButton(discord.ui.Button):
         
         else:
             await interaction.response.defer(ephemeral=True, invisible=False)
+
+            # Pas réussi à modifier le message original avec l'embed
             await interaction.followup.delete_message(interaction.message.id)
 
             conn = await database.connexion()
             cur = await conn.cursor()
             
+            # Si aucun critère n'a été pertinent (= on cherche tous les plongeurs)
             if self.view.request == default_request:
                 self.view.request = "SELECT idPlongeur FROM Plongeur WHERE consent = 1;"
             else:
-                self.view.request += ')'
+                self.view.request += ');'
             
-            results = await (await cur.execute(self.view.request)).fetchall()
+            try:
+                results = await (await cur.execute(self.view.request)).fetchall()
+            except:
+                print(f"Erreur requête:")
+                print(self.view.request)
+                await self.view.disable_all_items()
+
+                # <@461249475999170582> -> mon id discord
+                await interaction.followup.send(content="Une erreur a eu lieu, contactez <@461249475999170582>")
 
             await cur.close()
             await conn.close()
 
 
-            pages = [EmbedPlongeur(self.view.bot, int(id[0])) for id in results]
+            pages = []
+            for id in results:
+                plongeur = guild.get_member(id[0])
+                
+                # Principalement pour tester sur le serv de test
+                # car tous les plongeurs de la db ne sont pas dans le serveur
+                # de test.
+                if not plongeur:
+                    plongeur = bot.get_or_fetch_user(id[0])
+                    if not plongeur: continue
+                
+                pages.append(await Plongeur(plongeur).to_embed())
             
-
             if pages:
-                await pages[0].build()
-                tmp = SearchResults(pages)
-                await tmp.respond(interaction, ephemeral=True)
+                test = SearchResults(pages)
+                # await test.edit(message=msg)      # Ne fonctionne pas
+                await test.respond(interaction, ephemeral=True)
             else:
                 await interaction.followup.send(content="Aucun plongeur ne correspond à vos critères", ephemeral=True)
 
@@ -276,5 +300,3 @@ class PageCounter(discord.ui.Button):
             custom_id="page_button",
             disabled=True
         )
-
-
