@@ -52,6 +52,7 @@ class ArgoBot(discord.Bot):
         self.settings['bot-settings']['is_infos_plongeur_locked'] = 'True'
         self.__update_settings_file()
     
+
     def unlock_infos_plongeur(self):
         if not self.is_infos_plongeur_locked(): 
             return  # Evite d'écrire dans le fichier pour rien
@@ -59,7 +60,6 @@ class ArgoBot(discord.Bot):
         self.settings['bot-settings']['is_infos_plongeur_locked'] = 'False'
         self.__update_settings_file()
     
-
 
     def lock_cards(self):
         if self.is_cards_locked(): 
@@ -77,7 +77,7 @@ class ArgoBot(discord.Bot):
         self.__update_settings_file()
 
 
-
     async def arret(self, user: discord.Member):
-        print(f"\nBot arrêté par {user.nick}")
+        if user:
+            print(f"\nBot arrêté par {user.nick}")
         await self.close()

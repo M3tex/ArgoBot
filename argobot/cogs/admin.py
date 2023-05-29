@@ -32,14 +32,13 @@ class Admin(Cog):
             await ctx.respond(messages.NOT_ADMIN, ephemeral=True)
             return
     
-        avertissement = ":warning: **Action irréversible** :warning:"
+        avertissement = "## :warning: **Action irréversible** :warning:"
         avertissement += "\n\nCette commande n'est à utiliser *qu'en cas de grave problème*."
         avertissement += "\n**Seul Mathis** pourra ré-allumer le bot si vous confirmez !"
 
         await ctx.respond(avertissement, view=MenuArretBot(self.bot), ephemeral=True)
 
 
-    
 
     #------------- Dashboard infos plongeur -------------#
 
@@ -64,5 +63,4 @@ class Admin(Cog):
 
 def setup(bot: ArgoBot):
     cog = Admin(bot)
-
     bot.add_cog(cog)

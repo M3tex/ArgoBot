@@ -1,11 +1,19 @@
 import discord
 from menus.recherche_binome import MenuRecherche
+from menus.creation_infos_plongeur import MenuInfosStockees
 import constants.messages as messages
 from bot_class import ArgoBot
+from plongeur import Plongeur
 
 from discord.ext.commands import Cog, slash_command
 
 
+
+# Commandes ne faisant pas partie d'un sous-groupe.
+#
+# Actuellement:
+# /rgpd
+# /recherche_binome
 
 
 class GeneralCommands(Cog):
@@ -17,16 +25,16 @@ class GeneralCommands(Cog):
 
     @slash_command (name="rgpd", description="Informations sur les RGPD")
     async def rgpd(self, ctx: discord.ApplicationContext):
-        await ctx.respond(content=messages.RGPD, ephemeral=True)
+        plongeur = Plongeur(ctx.user)
+        await ctx.respond(content=messages.RGPD, view=MenuInfosStockees(plongeur, self.bot), ephemeral=True)
 
 
     @slash_command (name = "recherche_binome", description = "Permet de rechercher un binome")
     async def recherche_binome(self, ctx: discord.ApplicationContext):
         view = MenuRecherche(ctx.bot)
 
-        await ctx.respond(content= messages.RECHERCHE_BINOME, view = view, ephemeral = True)
+        await ctx.respond(content=messages.RECHERCHE_BINOME, view=view, ephemeral=True)
         return
-
 
 
 

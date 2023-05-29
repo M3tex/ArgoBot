@@ -1,0 +1,180 @@
+---
+# Ce fichier contient les données statiques, qui sont automatiquement
+# ajoutées à la base de données.
+
+# Fédérations
+Federation:
+  FFESSM:
+    desc: "Fédération Française d'Etude et de Sports Sous-Marins"
+
+  PADI:
+    desc: "Professional Association of Diving Instructors"
+
+  SSI:
+    desc: "Scuba Schools International"
+
+  ANMP:
+    desc: "Association Nationale des Moniteurs de Plongée"
+
+
+# Niveaux de Plongée
+Niveau:
+  Niveau 1:
+    prof-max-autonome: 0
+    desc: "Plongeur encadré à 20m"
+    rang: 1
+    fedes: [ffessm, anmp]
+
+  Niveau 2:
+    prof-max-autonome: 20
+    desc: "Plongeur autnome à 20m, encadré à 40m"
+    rang: 2
+    fedes: [ffessm, anmp]
+
+  Niveau 3:
+    prof-max-autonome: 60
+    desc: "Autonome à 40m sans DP, Autonome à 60m avec DP"
+    rang: 3
+    fedes: [ffessm, anmp]
+
+  Niveau 4:
+    prof-max-autonome: 60
+    desc: "Guide de Palanquée"
+    rang: 4
+    fedes: [ffessm, anmp]
+
+  Niveau 5:
+    prof-max-autonome: 60
+    desc: "Directeur de Plongée"
+    rang: 5
+    fedes: [ffessm, anmp]
+
+  Moniteur Fédéral 1:
+    prof-max-autonome: 60
+    desc: ~
+    rang: 6
+    fedes: [ffessm, anmp]
+
+  Moniteur Fédéral 2:
+    prof-max-autonome: 60
+    desc: ~
+    rang: 7
+    fedes: [ffessm, anmp]
+  
+
+  Open Water Diver:
+    prof-max-autonome: 18
+    desc: ~
+    rang: 1.5
+    fedes: [padi, ssi]
+
+  Adventure Diver:
+    prof-max-autonome: 18
+    desc: ~
+    rang: 1.75
+    fedes: [padi, ssi]
+
+  Advanced Open Water:
+    prof-max-autonome: 30
+    desc: ~
+    rang: 2
+    fedes: [padi, ssi]
+
+  Deep Diver:
+    prof-max-autonome: 40
+    desc: ~
+    rang: 3
+    fedes: [padi, ssi]
+
+  Dive Master:
+    prof-max-autonome: 40
+    desc: ~
+    rang: 4
+    fedes: [padi, ssi]
+
+  Instructor:
+    prof-max-autonome: 40
+    desc: ~
+    rang: 6
+    fedes: [padi, ssi]
+
+
+# Spécialités
+Specialite:
+  Pas de spécialité:
+    desc: "Je n'ai pas de spécialité"
+
+  Qualification Nitrox:
+    desc: "Je peux plongeur au Nitrox (< 40% d'O2)"
+
+  Qualification Nitrox Avancé:
+    desc: "Je peux plongeur au Nitrox (> 40% d'O2)"
+
+  Qualification combinaison étanche:
+    desc: "Je suis qualifié pour plonger en combinaison étanche"
+
+  Qualification Recycleur:
+    desc: "Je peux plongeur au Nitrox (< 40% d'O2)"
+
+  Qualification TriMix:
+    desc: "Je suis qualifié pour plonger avec un mélange contenant de l'Helium"
+
+  Qualification TriMix Avancé:
+    desc: ~
+
+  Qualification Sidemount:
+    desc: "Je suis qualifié pour plonger en configuration Sidemount"
+
+  Formation Secourisme:
+    desc: "J'ai suivi une formation de secourisme spécifique à la plongée"
+
+  Wetsuit Filler:
+    desc: "Nan, je n'ai pas pissé dans ma combi..."
+
+
+# Intérêts
+Interet:
+  Chasse sous-marine:
+    desc: "Je pratique la chasse sous-marine"
+
+  Biologie:
+    desc: "Je m'intéresse beaucoup à la vie sous marine !"
+
+  Épaves & Histoire:
+    desc: "Les épaves et leurs histoires me fascinent"
+
+  Photo & Vidéo:
+    desc: "Ma passion c'est l'image !"
+
+  Apnée:
+    desc: "Je pratique l'apnée (pas en plongée attention !)'"
+
+  Plongée Sportive:
+    desc: "Je pratique la plongée sportive"
+
+  Millieu Associatif:
+    desc: "Je suis actif au sein d'une association liée à la vie marine"
+
+
+# Professions
+Profession:
+  Instructeur de plongée:
+    desc: "J'enseigne la plongée"
+
+  Biologiste:
+    desc: "J'étudie la vie marine"
+
+  Archéologue:
+    desc: "Je participe à des fouilles sous-marines"
+
+  Cadreur sous-marin:
+    desc: "Je vis de la vidéo sous-marine"
+
+  Scaphandrier:
+    desc: "J'aime bien avoir la tête au sec !"
+
+  Centre de plongée:
+    desc: "Je possède / gère un centre de plongée"
+
+  Médecin Hyperbare:
+    desc: "Je m'y connais en bubulles !"

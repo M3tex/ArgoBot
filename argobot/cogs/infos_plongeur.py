@@ -1,10 +1,10 @@
 import discord
 from plongeur import Plongeur
 import menus.creation_infos_plongeur as menus
-import constants.messages as messages
 from bot_class import ArgoBot
-
+from globals import CONSTANTES
 from discord.ext.commands import Cog
+from diver_card import create_diver_card
 
 
 # CoG -> Command Groups
@@ -12,19 +12,17 @@ from discord.ext.commands import Cog
 
 
 # Ce fichier contient les commandes contenues dans le groupe `infos_plongeur`
-# ainsi que les commandes admin associées
-
-# TODO: Faire un groupe admin pour *toutes* les futures commandes admin, et faire des
-# sous-groupes ? Du style `admin infos_plongeur bloque_carte`
-
-# Sinon faire une commande qui affiche un menu d'administration (`admin infos_plongeur`)
+#
+# Actuellement:
+# /infos_plongeur aide
+# /infos_plongeur carte
+# /infos_plongeur création
+# /infos_plongeur suppression
 
 
 
 class InfosPlongeur(Cog):
-
-    # Pas réussi à mettre des commandes cachées dans un groupe public
-    public_group = discord.SlashCommandGroup(
+    group = discord.SlashCommandGroup(
         name = "infos_plongeur",
         description = "Toutes les commandes liées aux infos de plongeur !"
     )
@@ -35,38 +33,38 @@ class InfosPlongeur(Cog):
 
 
 
-
-    #------------- Commandes Publiques -------------#
-
-    @public_group.command (
+    @group.command (
         name="aide",
         description="Affiche une description détaillée de toutes les commandes"
     )
     async def aide(self, ctx: discord.ApplicationContext):
-        await ctx.respond(messages.HELP_PLONGEURID, view=menus.MenuHelp(), ephemeral=True)
+        await ctx.respond(CONSTANTES.messages.HELP_PLONGEURID, view=menus.MenuHelp(), ephemeral=True)
         return
 
 
 
-    @public_group.command (
+    @group.command (
         name="création",
         description="Permet de saisir tes informations de plongeur !"
     )
     async def creation(self, ctx: discord.ApplicationContext):
         if self.bot.is_infos_plongeur_locked():
-            await ctx.respond(messages.INFO_CREA_LOCKED, ephemeral = True)
+            await ctx.respond(CONSTANTES.messages.INFO_CREA_LOCKED, ephemeral = True)
             return
 
         plongeur = Plongeur(ctx.author)
         view = menus.MenuCM1(plongeur)
         
-        await ctx.respond(messages.CREATION_MENU_1, view=view, ephemeral=True)
+        if await plongeur.est_dans_db():
+            await ctx.respond(CONSTANTES.messages.CREATION_MENU_1, view=view, ephemeral=True)
+        else:
+            await ctx.respond(CONSTANTES.messages.WARNING_RGPD, view=menus.MenuInfoCollect(plongeur), ephemeral = True)
         return
 
 
 
     # ? Enlever le param optionnel sur la commande publique et faire une commande admin dédiée ?
-    @public_group.command (
+    @group.command (
         name = "suppression",
         description = "Permet de supprimer tes informations de la base de données"
     )
@@ -80,7 +78,7 @@ class InfosPlongeur(Cog):
     async def suppression(self, ctx: discord.ApplicationContext, user: discord.Member):
 
         if self.bot.is_infos_plongeur_locked():
-            await ctx.respond(messages.INFO_CREA_LOCKED, ephemeral = True)
+            await ctx.respond(CONSTANTES.messages.INFO_CREA_LOCKED, ephemeral = True)
             return
 
         to_remove = ctx.author
@@ -93,26 +91,26 @@ class InfosPlongeur(Cog):
 
         await Plongeur(to_remove).supprime()
         
-        await ctx.respond(messages.SUPPRESSION_PLONGEUR.format(to_remove.display_name), ephemeral=True)
+        await ctx.respond(CONSTANTES.messages.SUPPRESSION_PLONGEUR.format(to_remove.display_name), ephemeral=True)
     
 
 
-    @public_group.command (
+    @group.command (
         name = "carte",
         description = "Permet d'afficher ta carte de plongeur !"
     )
     async def carte(self, ctx: discord.ApplicationContext):
         if self.bot.is_cards_locked():
-            await ctx.respond(messages.INFO_CARD_LOCKED, ephemeral = True)
+            await ctx.respond(CONSTANTES.messages.INFO_CARD_LOCKED, ephemeral = True)
             return
         
         plongeur = await Plongeur(ctx.author).load_from_db()
         if plongeur == None:
-            await ctx.respond(messages.PLONGEUR_INEXISTANT, ephemeral = True)
+            await ctx.respond(CONSTANTES.messages.PLONGEUR_INEXISTANT, ephemeral = True)
             return
-        
-        await plongeur.envoi_carte(ctx)
-        return
+ 
+        carte = await plongeur.get_card()
+        await ctx.respond(file=carte, ephemeral=True)
       
 
 
