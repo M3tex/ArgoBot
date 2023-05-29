@@ -22,6 +22,7 @@ class ArgoBot(discord.Bot):
 
         self.load_extension('cogs.infos_plongeur')
         self.load_extension('cogs.admin')
+        self.load_extension('cogs.general')
 
 
         # On récupère les données contenues dans le fichier de configuration
@@ -51,6 +52,7 @@ class ArgoBot(discord.Bot):
         self.settings['bot-settings']['is_infos_plongeur_locked'] = 'True'
         self.__update_settings_file()
     
+
     def unlock_infos_plongeur(self):
         if not self.is_infos_plongeur_locked(): 
             return  # Evite d'écrire dans le fichier pour rien
@@ -58,7 +60,6 @@ class ArgoBot(discord.Bot):
         self.settings['bot-settings']['is_infos_plongeur_locked'] = 'False'
         self.__update_settings_file()
     
-
 
     def lock_cards(self):
         if self.is_cards_locked(): 
@@ -76,7 +77,7 @@ class ArgoBot(discord.Bot):
         self.__update_settings_file()
 
 
-
     async def arret(self, user: discord.Member):
-        print(f"\nBot arrêté par {user.nick}\n")
+        if user:
+            print(f"\nBot arrêté par {user.nick}")
         await self.close()

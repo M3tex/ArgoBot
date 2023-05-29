@@ -1,9 +1,23 @@
 import dotenv
 import os
-import logging
-
 from bot_class import ArgoBot
-import database
+
+import globals
+import asyncio
+import os
+from signal import signal, SIGUSR1
+
+
+argobot: ArgoBot
+
+
+
+def quit_bot(sig, _):
+    # Pas de nettoyage à faire pour l'instant
+    print("Arrêt du bot")
+    loop = asyncio.get_running_loop()
+    loop.create_task(argobot.arret(None))
+
 
 
 
@@ -13,31 +27,18 @@ if __name__ == "__main__":
     TOKEN = os.getenv("ARGOBOT_TOKEN")
     PATH = os.getenv("PATH_PROJECT")
 
-
-    # Date de dernier lancement du bot
-    try:
-        last_launched = os.path.getmtime(PATH + "logs/dicord.log")
-    except:
-        last_launched = 0
-    
-    # Date de dernier ajout dans les fichiers contenant les constantes
-    last_modified = os.path.getmtime(PATH + "argobot/constants")
+    signal(SIGUSR1, quit_bot)
 
 
-    # Pour les logs
-    logger = logging.getLogger('discord')
-    logger.setLevel(logging.DEBUG)
-    handler = logging.FileHandler(filename='logs/discord.log', encoding='utf-8', mode='w')
-    handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-    logger.addHandler(handler)
-
+    globals.init()
     argobot = ArgoBot()
+
 
     @argobot.event
     async def on_ready():
-        tmp = await database.connexion(last_modified > last_launched)
-        print("Bot en ligne")
-        await tmp.close()
+        print("Lancement du bot...")
+        await globals.global_data.async_init(argobot)
+        print("Bot lancé")
 
 
     argobot.run(TOKEN)

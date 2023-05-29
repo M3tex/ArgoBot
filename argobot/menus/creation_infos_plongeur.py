@@ -1,11 +1,13 @@
 import discord
-import constants.select_options as options
-import constants.messages as messages
 from plongeur import Plongeur
+from bot_class import ArgoBot
+
+from globals import global_data, CONSTANTES
+import io
 
 
-
-
+# TODO: A refaire entièrement avec Paginator + intégration
+# avec les nouvelles classes.
 
 
 ############### Menus à choix multiples (View Subclass) ###############
@@ -22,7 +24,7 @@ class MenuCM1(discord.ui.View):
         self.plongeur = plongeur
 
         listItems = [FederationSelect(), NombrePlongeeSelect(), SpecialitesSelect(),
-                     SuivantButton(menu = 1), ResetButton(menu = 1), StopButton()]
+                      StopButton(), ResetButton(menu = 1), SuivantButton(menu = 1)]
         
 
         super().__init__()
@@ -46,7 +48,7 @@ class MenuCM1(discord.ui.View):
 class MenuCM2(discord.ui.View):
     
     def __init__(self, plongeur: Plongeur):
-        listItems = [PratiqueSelect(), InteretSelect(), SearchConsentSelect(), SuivantButton(menu = 2), ResetButton(menu = 2), StopButton()]
+        listItems = [PratiqueSelect(), InteretSelect(), SearchConsentSelect(), StopButton(), ResetButton(menu = 2), SuivantButton(menu = 2)]
         super().__init__()
 
         for it in listItems:
@@ -54,6 +56,33 @@ class MenuCM2(discord.ui.View):
         
         self.plongeur = plongeur
 
+
+# ! Rien à faire ici, faire un nouveau fichier spécial pour les petits menus
+
+### Information sur collecte de donnée
+class MenuInfoCollect(discord.ui.View):
+    def __init__(self, plongeur: Plongeur):
+        super().__init__()
+        self.plongeur = plongeur
+        self.add_item(StopButton())
+        self.add_item(SuivantButton(menu = 3))
+
+
+### Données stockées sur utilisateur:
+class MenuInfosStockees(discord.ui.View):
+    def __init__(self, plongeur: Plongeur, bot: ArgoBot):
+        super().__init__()
+        self.add_item(GetInfoButton(plongeur, bot))
+
+
+### Affichage infos plongeur RGPD
+class MenuAffichageInfos(discord.ui.View):
+    def __init__(self, plongeur: Plongeur, msg: str):
+        super().__init__()
+        self.msg = msg
+        self.add_item(StopButton())
+        self.add_item(DeleteInfoButton(plongeur))
+        self.add_item(DLInfoButton(plongeur))
 
 
 ### Menu d'aide
@@ -93,7 +122,7 @@ class MenuText(discord.ui.Modal):
         await self.plongeur.to_db()
 
         return await interaction.response.edit_message (
-            content = messages.CREATION_SUCCESS,
+            content = CONSTANTES.messages.CREATION_SUCCESS,
             view=None
         )
 
@@ -108,48 +137,29 @@ class MenuText(discord.ui.Modal):
 
 ### Choix des fédérations
 class FederationSelect(discord.ui.Select):
-
+    view: MenuCM1
     def __init__(self):
         super().__init__(
             placeholder = "Fédération",
             min_values = 1,
-            max_values = len(options.FEDERATIONS),
+            max_values = len(CONSTANTES.select_options.FEDERATIONS),
             row = 0,
-            options = options.FEDERATIONS,
-            
+            options = CONSTANTES.select_options.FEDERATIONS,
         )
     
     # Override de la méthode callback (appelée après une intéraction)
     async def callback(self, interaction: discord.Interaction):
-        fede_selected = self.values
+        fede_selected = [int(x) for x in self.values]
         opt_niveaux = []
-        already_selected = []
 
         for fede in fede_selected:
-            opt_niveaux += [el for el in options.NIVEAUX 
-                            if el.value.split(':')[1] == fede and el.value.split(':')[0] not in already_selected]
-            
-            already_selected += [el.value.split(':')[0] for el in options.NIVEAUX 
-                                 if el.value.split(':')[1] == fede]
-
-        # 0 est l'id de la FFESSM. TODO: trouver + lisible ?   
-        # if "0" in fede_selected:
-        #     opt_niveaux += [el for el in options.NIVEAUX_FFESSM if el not in opt_niveaux]
+            # Pour ne proposer que les niveaux des fédérations sélectionnées
+            for niv in global_data.niveaux:
+                if fede in niv.federations and niv.select_option not in opt_niveaux:
+                    opt_niveaux.append(niv.select_option)
         
-        # # 1 est l'id de PADI
-        # if "1" in fede_selected:
-        #     opt_niveaux += [el for el in options.NIVEAUX_PADI if el not in opt_niveaux]
-
-        # # 2 est l'id de SSI
-        # if "2" in fede_selected:
-        #     opt_niveaux += [el for el in options.NIVEAUX_SSI if el not in opt_niveaux]
-        
-        # # 3 est l'id de l'ANMP
-        # if "3" in fede_selected:
-        #     opt_niveaux += [el for el in options.NIVEAUX_ANMP if el not in opt_niveaux]
-
-
-        self.view.plongeur.federations = [int(id) for id in fede_selected]
+        self.view.plongeur.federations = [global_data.get_info("Federation", id) 
+                                          for id in fede_selected]
         self.view.add_item(NiveauSelect(opt_niveaux))
         self.disabled = True
         await interaction.response.edit_message(view=self.view)
@@ -167,9 +177,10 @@ class NiveauSelect(discord.ui.Select):
             custom_id = "niveaux",
         )
 
-    # Override de la méthode callback (appelée après une intéraction)    
+  
     async def callback(self, interaction: discord.Interaction):
-        self.view.plongeur.niveaux = [int(id.split(':')[0]) for id in self.values]
+        self.view.plongeur.niveaux = [global_data.get_info("Niveau", int(id)) 
+                                      for id in self.values]
         await interaction.response.defer()
 
 
@@ -181,7 +192,7 @@ class NombrePlongeeSelect(discord.ui.Select):
             min_values = 1,
             max_values = 1,
             row = 2,
-            options = options.NOMBRE_PLONGEES
+            options = CONSTANTES.select_options.NOMBRE_PLONGEES
         )
     
     async def callback(self, interaction: discord.Interaction):
@@ -197,12 +208,13 @@ class SpecialitesSelect(discord.ui.Select):
             placeholder = "Spécialités",
             min_values = 1,
             row = 3,
-            max_values = len(options.SPECIALITES),
-            options = options.SPECIALITES
+            max_values = len(CONSTANTES.select_options.SPECIALITES),
+            options = CONSTANTES.select_options.SPECIALITES
         )
     
     async def callback(self, interaction: discord.Interaction):
-        self.view.plongeur.specialites = [int(id) for id in self.values]
+        self.view.plongeur.specialites = [global_data.get_info("Specialite", int(id)) 
+                                          for id in self.values]
         await interaction.response.defer()
 
 
@@ -215,7 +227,7 @@ class PratiqueSelect(discord.ui.Select):
         min_values = 1,
         max_values = 2,
         row = 0,
-        options = options.PRATIQUE
+        options = CONSTANTES.select_options.PRATIQUE
     )
     
     async def callback(self, interaction: discord.Interaction):
@@ -235,13 +247,14 @@ class InteretSelect(discord.ui.Select):
         super().__init__(
         placeholder = "Interêts",
         min_values = 1,
-        max_values = len(options.INTERETS),
+        max_values = len(CONSTANTES.select_options.INTERETS),
         row = 2,
-        options = options.INTERETS
+        options = CONSTANTES.select_options.INTERETS
     )
     
     async def callback(self, interaction: discord.Interaction):
-        self.view.plongeur.interets = [int(id) for id in self.values]
+        self.view.plongeur.interets = [global_data.get_info("Interet", int(id)) 
+                                      for id in self.values]
         await interaction.response.defer()
 
 
@@ -252,14 +265,15 @@ class ProfessionSelect(discord.ui.Select):
         super().__init__(
             placeholder = "Profession",
             min_values = 1,
-            max_values = len(options.PROFESSIONS),
+            max_values = len(CONSTANTES.select_options.PROFESSIONS),
             row = 1,
-            options = options.PROFESSIONS,
+            options = CONSTANTES.select_options.PROFESSIONS,
             custom_id = "professions"
         )
 
     async def callback(self, interaction: discord.Interaction):
-        self.view.plongeur.profession = [int(id) for id in self.values]
+        self.view.plongeur.profession = [global_data.get_info("Profession", int(id)) 
+                                        for id in self.values]
         await interaction.response.defer()
     
 
@@ -268,11 +282,11 @@ class ProfessionSelect(discord.ui.Select):
 class SearchConsentSelect(discord.ui.Select):
     def __init__(self):
         super().__init__(
-            placeholder="Rendre mes données publiques ?",
+            placeholder="Apparaître dans les résultats de recherche ?",
             min_values=1,
             max_values=1,
             row=3,
-            options= options.CHOIX_REFERENCEMENT
+            options= CONSTANTES.select_options.CHOIX_REFERENCEMENT
         )
     
     async def callback(self, interaction: discord.Interaction):
@@ -288,14 +302,14 @@ class CmdSelect(discord.ui.Select):
             placeholder="Commande",
             min_values=1,
             max_values=1,
-            options = options.HELP_PLONGEURID
+            options = CONSTANTES.select_options.HELP_PLONGEURID
         )
 
     async def callback(self, interaction: discord.Interaction):
         cmd_to_help = {
-            "création": messages.HELP_CREATION,
-            "suppression": messages.HELP_SUPPRESSION,
-            "carte": messages.HELP_CARTE
+            "création": CONSTANTES.messages.HELP_CREATION,
+            "suppression": CONSTANTES.messages.HELP_SUPPRESSION,
+            "carte": CONSTANTES.messages.HELP_CARTE
         }
         await interaction.response.edit_message(content=cmd_to_help[self.values[0]], view=None)
 
@@ -331,11 +345,11 @@ class SuivantButton(discord.ui.Button):
             # TODO: Trouver une manière + propre que de passer par le callback du reset ?
             await self.view.get_item("rst_button").callback_menu1 (
                 interaction,
-                content = messages.CREATION_INCOMPLET + messages.MENU_1
+                content = CONSTANTES.messages.CREATION_INCOMPLET + CONSTANTES.messages.CREATION_MENU_1
             )
         else:
             await interaction.response.edit_message (
-                content = messages.MENU_2,
+                content = CONSTANTES.messages.CREATION_MENU_2,
                 view=MenuCM2(self.view.plongeur)
             )
 
@@ -347,7 +361,7 @@ class SuivantButton(discord.ui.Button):
         if not plongeur.menu2_est_complet():
             await self.view.get_item("rst_button").callback_menu2 (
                 interaction,
-                content = messages.CREATION_INCOMPLET + messages.MENU_2
+                content = CONSTANTES.messages.CREATION_INCOMPLET + CONSTANTES.messages.CREATION_MENU_2
             )
         else:
             await interaction.response.send_modal(MenuText(self.view.plongeur))
@@ -359,6 +373,9 @@ class SuivantButton(discord.ui.Button):
             await self.__callback_menu1(interaction)
         elif self.menu == 2:
             await self.__callback_menu2(interaction)
+        elif self.menu == 3:
+            msg = CONSTANTES.messages.CREATION_MENU_1
+            await interaction.response.edit_message(content=msg, view=MenuCM1(self.view.plongeur))
         else:   # ne devrait pas arriver mais au cas où
             await interaction.response.defer()
 
@@ -377,7 +394,7 @@ class ResetButton(discord.ui.Button):
         self.menu = menu
 
     # On fait 2 méthodes de callback: 1 pour chaque menu
-    async def callback_menu1(self, interaction: discord.Interaction, content = messages.MENU_1):
+    async def callback_menu1(self, interaction: discord.Interaction, content=CONSTANTES.messages.CREATION_MENU_1):
         self.view.enable_all_items()
         tmp = self.view.get_item("niveaux")
         if tmp:
@@ -386,7 +403,7 @@ class ResetButton(discord.ui.Button):
         await interaction.response.edit_message(content = content, view=self.view)
 
 
-    async def callback_menu2(self, interaction: discord.Interaction, content = messages.MENU_1):
+    async def callback_menu2(self, interaction: discord.Interaction, content=CONSTANTES.messages.CREATION_MENU_1):
         self.view.enable_all_items()
         tmp = self.view.get_item("professions")
         if tmp:
@@ -418,10 +435,80 @@ class StopButton(discord.ui.Button):
         self.view.disable_all_items()
         self.view.stop()
         await interaction.response.edit_message(
-            content = messages.ABANDON_CREATION,
-            view=self.view
+            content = CONSTANTES.messages.ABANDON_CREATION,
+            view=self.view, embed=None
         )
 
+
+class GetInfoButton(discord.ui.Button):
+    def __init__(self, plongeur: Plongeur, bot: ArgoBot):
+        super().__init__(
+            label="Mes informations",
+            style=discord.ButtonStyle.blurple,
+            row = 4
+        )
+        self.plongeur = plongeur
+        self.bot = bot
+    
+    
+    async def callback(self, interaction: discord.Interaction):
+        if await self.plongeur.est_dans_db():
+            rep = await self.plongeur.to_embed()
+            msg = f"## Voici vos informations:\n\n"
+            msg += f"Identifiant Discord: `{self.plongeur.user.id}`\n"
+            msg += f"Consent à apparaître dans les résultats de recherche de binome: "
+            msg += "`oui`" if self.plongeur.search_consent else "`non`"
+            await interaction.response.edit_message(content=msg, embed=rep, view=MenuAffichageInfos(self.plongeur, msg))
+        else:
+            await interaction.response.edit_message(content=CONSTANTES.messages.PLONGEUR_INEXISTANT, view=None)
+
+
+class DeleteInfoButton(discord.ui.Button):
+    def __init__(self, plongeur: Plongeur):
+        super().__init__(
+            label="Supprimer mes informations",
+            style=discord.ButtonStyle.blurple,
+            row=4
+        )
+        self.plongeur = plongeur
+    
+
+    async def callback(self, interaction: discord.Interaction):
+        await self.plongeur.supprime()
+
+        msg = CONSTANTES.messages.SUPPRESSION_PLONGEUR.format(interaction.user.display_name)
+        await interaction.response.edit_message(content=msg, view=None, embed=None)
+
+
+class DLInfoButton(discord.ui.Button):
+    view: MenuAffichageInfos
+    def __init__(self, plongeur: Plongeur):
+        super().__init__(
+            label="Télécharger mes données",
+            style=discord.ButtonStyle.green,
+            row=4
+        )
+        self.plongeur = plongeur
+        self.fichier_envoye = False
+    
+
+    async def callback(self, interaction: discord.Interaction):
+        if not self.fichier_envoye:
+            with io.StringIO() as fp:
+                fp.write(await self.plongeur.to_json())
+                fp.seek(0)
+                f = discord.File(fp=fp, filename=f"{self.plongeur.prenom}.json")
+
+            msg = "## Voici vos données au format `JSON`"
+            self.label = "Afficher mes données"
+            await interaction.response.edit_message(content=msg, embed=None, file=f, view=self.view)
+        else:
+            self.label = "Télécharger mes données"
+            emb = await self.plongeur.to_embed()
+            await interaction.response.edit_message(content=self.view.msg, attachments=[], embed=emb, view=self.view)
+
+        self.fichier_envoye = not self.fichier_envoye
+        
 
 ################## Champs Textuels (InputText Subclass) ##################
 #                                                                        #
