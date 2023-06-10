@@ -275,7 +275,7 @@ class SuivantButton(discord.ui.Button):
                 # car tous les plongeurs de la db ne sont pas dans le serveur
                 # de test.
                 if not plongeur:
-                    plongeur = bot.get_or_fetch_user(id[0])
+                    plongeur = await bot.get_or_fetch_user(id[0])
                     if not plongeur: continue
                 
                 pages.append(await Plongeur(plongeur).to_embed())

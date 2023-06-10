@@ -1,7 +1,7 @@
 import dotenv
 import os
 from bot_class import ArgoBot
-
+import discord
 import globals
 import asyncio
 import os
@@ -30,8 +30,10 @@ if __name__ == "__main__":
     signal(SIGUSR1, quit_bot)
 
 
+    intents = discord.Intents.default()
+    intents.members = True
     globals.init()
-    argobot = ArgoBot()
+    argobot = ArgoBot(intents=intents)
 
 
     @argobot.event

@@ -16,7 +16,7 @@ dotenv.load_dotenv()
 PATH = os.getenv("PATH_PROJECT")
 
  
-PATH_DB = PATH + "data/new_database.db"
+PATH_DB = PATH + "data/database.db"
 PATH_SCRIPT_CREA = PATH + "data/creation.sql"
 
 

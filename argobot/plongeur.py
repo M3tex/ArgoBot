@@ -73,13 +73,15 @@ class Plongeur():
 
         id = self.user.id
 
-        plongeur = (await (await cur.execute(sql_request.SELECT_PLONGEUR, (id, ))).fetchall())[0]
+        plongeur = await (await cur.execute(sql_request.SELECT_PLONGEUR, (id, ))).fetchall()
         
         # Si le plongeur n'est pas dans la base de données
         if not plongeur:
             await cur.close()
             await conn.close()
-            return None        
+            return None    
+
+        plongeur = plongeur[0]    
 
         # Données table plongeur
         self.prenom = plongeur[1]
