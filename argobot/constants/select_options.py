@@ -87,8 +87,8 @@ HELP_PLONGEURID: list[discord.SelectOption] = [
 # ---------- Menu recherche binôme ---------- #
 
 AUCUN_CRITERE = discord.SelectOption(
-    label="Pas de filtre",
-    description="Ce critère n'est pas pertinent dans ma recherche",
+    label="TOUT SELECTIONNER",
+    description="Je vous aime tous",
     value="Aucun"
 )
 
@@ -110,5 +110,20 @@ OPERATEURS: list[discord.SelectOption] = [
         label="OU",
         description="Les plongeurs ayant AU MOINS 1 des critères sélectionnés ci-dessous",
         value="OR"
+    )
+]
+
+
+MODES_NIVEAUX: list[discord.SelectOption] = [
+    discord.SelectOption(
+        label="Mode précis",
+        description="Fonctionne de la même manière que pour les autres critères",
+        value="precis"
+    ),
+    discord.SelectOption(
+        label="Mode équivalence",
+        description="Les plongeurs ayant au minimum l'équivalent du niveau sélectionné",
+        value="equivalent",
+        default=True
     )
 ]

@@ -39,7 +39,6 @@ if __name__ == "__main__":
     @argobot.event
     async def on_ready():
         print("Lancement du bot...")
-        await globals.global_data.async_init(argobot)
         print("Bot lancé")
 
 

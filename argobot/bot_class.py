@@ -77,6 +77,13 @@ class ArgoBot(discord.Bot):
         self.__update_settings_file()
 
 
+    async def start(self, token: str, *, reconnect: bool = True) -> None:
+        import globals
+        
+        await globals.global_data.async_init(self)
+        await super().start(token=token, reconnect=reconnect)
+
+
     async def arret(self, user: discord.Member):
         if user:
             print(f"\nBot arrêté par {user.nick}")

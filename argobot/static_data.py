@@ -78,7 +78,7 @@ class InfoGenerique:
 class NiveauPlongee(InfoGenerique):
     # Ordre sert à comparer les niveaux (N3 > N1 par exemple, ou N3 > OW)
     # en flottant (si besoin de subtilité / ajustements)
-    __ordre: float = -1
+    ordre: float = -1
     profondeur_max: int = -1
     federations: list[int]= []
 
@@ -101,7 +101,7 @@ class NiveauPlongee(InfoGenerique):
         self.nom = result[1]
         self.profondeur_max = result[2]
         self.description = result[3]
-        self.__ordre = result[4]
+        self.ordre = result[4]
 
         # Les fédérations qui proposent ce niveau
         req = requests.SELECT_FEDES_DE_NIVEAU
@@ -123,19 +123,19 @@ class NiveauPlongee(InfoGenerique):
     
     # Pour comparer les niveaux
     def __lt__(self, other):
-        return self.__ordre < other.__ordre
+        return self.ordre < other.__ordre
     
     def __le__(self, other):
-        return self.__ordre <= other.__ordre
+        return self.ordre <= other.__ordre
 
     def __gt__(self, other):
-        return self.__ordre > other.__ordre
+        return self.ordre > other.__ordre
     
     def __ge__(self, other):
-        return self.__ordre >= other.__ordre
+        return self.ordre >= other.__ordre
 
     def __eq__(self, other):
-        return self.__ordre == other.__ordre
+        return self.ordre == other.__ordre
     
     def __ne__(self, other):
-        return self.__ordre != other.__ordre
+        return self.ordre != other.__ordre

@@ -12,7 +12,7 @@ start_bot() {
     # (jour du lancement du bot)
     mkdir -p logs/$day
 
-    echo Lancement du bot...
+    echo "Lancement du bot..."
     nohup python3 -u argobot/main.py &> "logs/$day/nohup_$timestamp.out" &
     echo $! > pid
 
@@ -25,6 +25,7 @@ start_bot() {
 stop_bot() {
     kill -s 10 $(cat pid)
     echo "Bot hors ligne"
+    sleep 0.1
 
     while ps | grep $(cat pid);
     do 

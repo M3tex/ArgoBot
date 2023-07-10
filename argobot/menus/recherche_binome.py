@@ -3,11 +3,22 @@ import database
 from menus.recherche_results import SearchResults
 from bot_class import ArgoBot
 from plongeur import Plongeur
-from globals import CONSTANTES
+from globals import CONSTANTES, global_data
+
+import thefuzz
+from thefuzz import process
 
 
 
 default_request = "SELECT idPlongeur FROM Plongeur WHERE consent = 1 AND idPlongeur IN ("
+
+messages = [
+    CONSTANTES.messages.RECHERCHE_BINOME,
+    CONSTANTES.messages.RECHERCHE_NIVEAUX,
+    CONSTANTES.messages.RECHERCHE_SPECIALITE,
+    CONSTANTES.messages.RECHERCHE_INTERET
+]
+
 
 
 class MenuRecherche(discord.ui.View):
@@ -23,6 +34,8 @@ class MenuRecherche(discord.ui.View):
         self.niveaux = []
         self.specialites = []
         self.interets = []
+
+        self.mode_recherche_niveau = "equivalent"   # mode par défaut
 
         self.bot = bot
         
@@ -40,7 +53,8 @@ class MenuRecherche(discord.ui.View):
         self.add_item(CritereSelect("Federation"))
         self.add_item(OperatorSelect())
         
-        tmp = f"{self.no_page + 1}/{len(self.criteres)}"
+        # + 1 pour la sélection des régions à la fin
+        tmp = f"{self.no_page + 1}/{len(self.criteres) + 1}"
 
         buttons = [PrecedentButton(), CancelButton(), SuivantButton("Federation"), PageCounter(tmp)]
         for b in buttons:
@@ -56,9 +70,11 @@ class MenuRecherche(discord.ui.View):
 
         # On rajoute le critère actuel
         self.add_item(CritereSelect(self.criteres[self.no_page]))
-        self.add_item(OperatorSelect())
-
-        tmp = f"{self.no_page + 1}/{len(self.criteres)}"
+        if self.criteres[self.no_page] != "Niveau":
+            self.add_item(OperatorSelect())
+            
+        # + 1 pour la sélection des régions à la fin
+        tmp = f"{self.no_page + 1}/{len(self.criteres) + 1}"
 
         # Les boutons
         self.add_item(PrecedentButton())
@@ -66,8 +82,93 @@ class MenuRecherche(discord.ui.View):
         self.add_item(SuivantButton(self.criteres[self.no_page]))
         self.add_item(PageCounter(tmp))
 
+
+
+class RegionModal(discord.ui.Modal):
+    def __init__(self, request: str):
+
+        super().__init__(title="Filtre par régions")
+
+        explications = "Exemple: Bretagne, Normandie" + \
+        "\nPeut-être imprécis, laisser vide si non applicable"
+
+        self.add_item(
+            discord.ui.InputText(
+            label = "Région (séparer par des virgules si + d'une)",
+            style = discord.InputTextStyle.long,
+            placeholder = explications,
+            required=False
+            )
+        )
         
+
+        self.request = request
+
+    
+    async def callback(self, interaction: discord.Interaction):
         
+        regions = list()
+        if self.children[0].value:
+            for region in self.children[0].value.split(','):
+                regions += await find_matching_regions(region.strip())
+
+
+        if regions:
+            regions_str = '", "'.join(regions)
+            regions_req = f'SELECT idPlongeur FROM Plongeur WHERE region IN ("{regions_str}")'
+
+            self.request += f" INTERSECT {regions_req}" if self.request != default_request else regions_req
+
+        guild = interaction.guild
+        bot = interaction.client
+        await interaction.response.defer(ephemeral=True, invisible=False)
+
+        # Pas réussi à modifier le message original avec l'embed
+        await interaction.followup.delete_message(interaction.message.id)
+
+        conn = await database.connexion()
+        cur = await conn.cursor()
+        
+        # Si aucun critère n'a été pertinent (= on cherche tous les plongeurs)
+        if self.request == default_request:
+            self.request = "SELECT idPlongeur FROM Plongeur WHERE consent = 1;"
+        else:
+            self.request += ');'
+        
+        try:
+            results = await (await cur.execute(self.request)).fetchall()
+        except:
+            print(f"Erreur requête:")
+            print(self.request)
+            print()
+
+            # <@461249475999170582> -> mon id discord
+            return await interaction.followup.send(content="Une erreur a eu lieu, contactez <@461249475999170582>")
+
+        await cur.close()
+        await conn.close()
+
+
+        pages = []
+        for id in results:
+            plongeur = guild.get_member(id[0])
+            
+            # Principalement pour tester sur le serv de test
+            # car tous les plongeurs de la db ne sont pas dans le serveur
+            # de test.
+            if not plongeur:
+                plongeur = await bot.get_or_fetch_user(id[0])
+                if not plongeur: continue
+            
+            pages.append(await Plongeur(plongeur).to_embed())
+        
+        if pages:
+            test = SearchResults(pages)
+            # await test.edit(message=msg)      # Ne fonctionne pas
+            await test.respond(interaction, ephemeral=True)
+        else:
+            await interaction.followup.send(content=CONSTANTES.messages.RECHERCHE_NO_RESULT, ephemeral=True)
+
 
 
 
@@ -76,7 +177,7 @@ class OperatorSelect(discord.ui.Select):
 
     def __init__(self):
         super().__init__(
-            placeholder="Opérateur",
+            placeholder="ET / OU ?",
             min_values=1,
             max_values=1,
             options=CONSTANTES.select_options.OPERATEURS
@@ -96,9 +197,13 @@ class CritereSelect(discord.ui.Select):
     def __init__(self, critere: str):
         # On récupère les options dépendantes du critère
         critere_aucun = CONSTANTES.select_options.AUCUN_CRITERE
+
+        # Pour afficher les niveaux dans l'ordre décroissant
+        niveaux_sorted = global_data.niveaux.copy()
+        niveaux_sorted.sort(key=lambda x: x.ordre, reverse=True)
         CRITERE2OPTIONS = {
             "Federation": [critere_aucun] + CONSTANTES.select_options.FEDERATIONS.copy(),
-            "Niveau": [critere_aucun] + CONSTANTES.select_options.NIVEAUX.copy(),
+            "Niveau": [critere_aucun] + [x.select_option for x in niveaux_sorted],
             "Specialite": [critere_aucun] + CONSTANTES.select_options.SPECIALITES.copy(),
             "Interet": [critere_aucun] + CONSTANTES.select_options.INTERETS.copy()
         }
@@ -122,7 +227,7 @@ class CritereSelect(discord.ui.Select):
         super().__init__(
             placeholder=key2label[critere],
             min_values=1,
-            max_values=len(opt),
+            max_values=len(opt) if critere != "Niveau" else 1,
             options=opt
         )
 
@@ -156,7 +261,7 @@ class PrecedentButton(discord.ui.Button):
             self.view.no_page -= 1
             self.view.update()
         
-        await interaction.response.edit_message(view=self.view)
+        await interaction.response.edit_message(view=self.view, content=messages[self.view.no_page])
 
 
 
@@ -202,29 +307,36 @@ class SuivantButton(discord.ui.Button):
         op = "WHERE"    # Pour le premier
 
         values = self.view.crit2list[self.critere]
-        guild = interaction.guild
-        bot = interaction.client
-        msg = interaction.message
+        
+
 
         # todo: voir si moyen simple de faire des requêtes moins longues
 
         # si "Aucun" est sélectionné (i.e le critère n'est pas pertinent) alors
         # rien à faire on passe à la page suivante
-        if values != None:
+        if values:
             # On vérifie que tout ait été saisit.
             # Si un seul critère choisit, pas besoin d'opérateur
-            if not values or (not self.view.operator and len(values) != 1):
+            if (not self.view.operator and len(values) != 1):
                 await interaction.response.edit_message(content=CONSTANTES.messages.CREATION_INCOMPLET, view=self.view)
                 return
-        
-            for id in values:
-                # On se permet de formater les valeurs directement car rien de ce qui est formatté
-                # n'est modifiable / saisit par les utilisateurs
-                request += f"{op} idPlongeur IN "
-                request += f"(SELECT idPlongeur FROM {table} WHERE id{self.critere} = {id}) "
+            
+            # On fait l'équivalence des niveaux
+            if self.critere == "Niveau":
+                rang = global_data.get_info("Niveau", values[0]).ordre
 
-                op = self.view.operator
-        
+                request += f"""WHERE idPlongeur IN 
+                (SELECT idPlongeur FROM {table} WHERE id{self.critere} IN (
+                    SELECT idNiveau FROM Niveau WHERE rang >= {rang}
+                )) """
+            else:
+                for id in values:
+                    # On se permet de formater les valeurs directement car rien de ce qui est formatté
+                    # n'est modifiable / saisit par les utilisateurs
+                    request += f"{op} idPlongeur IN "
+                    request += f"(SELECT idPlongeur FROM {table} WHERE id{self.critere} = {id}) "
+
+                    op = self.view.operator
         
             # On ajoute la sous requête
             self.view.last_request = f" INTERSECT {request}" if self.view.no_page > 0 and self.view.request != default_request else f"{request}"
@@ -233,59 +345,13 @@ class SuivantButton(discord.ui.Button):
 
         if self.view.no_page + 1 < len(self.view.criteres):
             self.view.no_page += 1
+            msg = messages[self.view.no_page]
             self.view.update()
-        
-            await interaction.response.edit_message(view=self.view)
+            await interaction.response.edit_message(content=msg, view=self.view)
             return
         
         else:
-            await interaction.response.defer(ephemeral=True, invisible=False)
-
-            # Pas réussi à modifier le message original avec l'embed
-            await interaction.followup.delete_message(interaction.message.id)
-
-            conn = await database.connexion()
-            cur = await conn.cursor()
-            
-            # Si aucun critère n'a été pertinent (= on cherche tous les plongeurs)
-            if self.view.request == default_request:
-                self.view.request = "SELECT idPlongeur FROM Plongeur WHERE consent = 1;"
-            else:
-                self.view.request += ');'
-            
-            try:
-                results = await (await cur.execute(self.view.request)).fetchall()
-            except:
-                print(f"Erreur requête:")
-                print(self.view.request)
-                await self.view.disable_all_items()
-
-                # <@461249475999170582> -> mon id discord
-                await interaction.followup.send(content="Une erreur a eu lieu, contactez <@461249475999170582>")
-
-            await cur.close()
-            await conn.close()
-
-
-            pages = []
-            for id in results:
-                plongeur = guild.get_member(id[0])
-                
-                # Principalement pour tester sur le serv de test
-                # car tous les plongeurs de la db ne sont pas dans le serveur
-                # de test.
-                if not plongeur:
-                    plongeur = await bot.get_or_fetch_user(id[0])
-                    if not plongeur: continue
-                
-                pages.append(await Plongeur(plongeur).to_embed())
-            
-            if pages:
-                test = SearchResults(pages)
-                # await test.edit(message=msg)      # Ne fonctionne pas
-                await test.respond(interaction, ephemeral=True)
-            else:
-                await interaction.followup.send(content="Aucun plongeur ne correspond à vos critères", ephemeral=True)
+            await interaction.response.send_modal(RegionModal(self.view.request))
 
 
 
@@ -300,3 +366,43 @@ class PageCounter(discord.ui.Button):
             custom_id="page_button",
             disabled=True
         )
+
+
+
+async def get_all_regions() -> list[str]:
+    """
+    Retourne toutes les régions renseignées par les plongeurs.
+    """
+    conn = await database.connexion()
+    cur = await conn.cursor()
+
+    req = "SELECT region FROM Plongeur;"
+    result = await (await cur.execute(req)).fetchall()
+    result = [res[0] for res in result]
+
+    await cur.close()
+    await conn.close()
+
+
+    return result
+
+
+
+# Distance minimale pour être considéré comme "proche"
+SEUIL = 80
+
+
+async def find_matching_regions(chain: str) -> list[str]:
+    """
+    Retourne les régions qui ont un score de distance >= à SEUIL pour
+    la chaine passée en paramètre.
+    """
+    collection = await get_all_regions()
+    matches = process.extract(chain, collection)
+    
+    result = list()
+    for match in matches:
+        if match[1] >= SEUIL:
+            result.append(match[0])
+    
+    return result

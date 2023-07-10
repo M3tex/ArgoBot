@@ -158,9 +158,7 @@ RECHERCHE_BINOME = """
 ## Bienvenue dans le menu de **recherche de binôme** :mag: !
 
 Chaque page du menu vous permettra de filtrer le résultat par critères.
-Vous pourrez changer l'opérateur indépendamment pour chaque critère.
 
-Les opérateurs:
 - `ET`: Seuls les plongeurs possédant **tous** les crtitères sélectionnés seront dans les résultats.
 - `OU`: Seuls les plongeurs possédant **au moins 1** des critères sélectionnés seront dans les résultats.
 
@@ -169,6 +167,32 @@ Je sélectionne les fédérations PADI et FFESSM.
 Si je choisis le **ET**, seulement les plongeurs affiliés à la fois à PADI **et** à la FFESSM seront présents \
 dans les résultats.
 Si je choisis le **OU**, les plongeurs affiliés à PADI **ou** à la FFESSM seront présents.*"""
+
+
+RECHERCHE_NIVEAUX = """
+## Bienvenue dans le menu de **recherche de binôme** :mag: !
+
+Les niveaux sont rangés dans l'ordre décroissant. Attention, certains niveaux sont équivalents \
+mais la liste ne permet pas de les afficher côte à côte (PADI c mieux)
+
+Sélectionnez le niveau minimum souhaité *(par exemple si je sélectionne N2, j'aurais tous les \
+plongeurs ayant un niveau "supérieur ou égal" au N2 → N2, Advanced, Deep, N3, N4, etc.)*"""
+
+
+RECHERCHE_SPECIALITE = """
+## Bienvenue dans le menu de **recherche de binôme** :mag: !
+
+Sélectionne les spécialités que tu aimerais retrouver chez ton futur binôme :wink:"""
+
+
+RECHERCHE_INTERET = """
+## Bienvenue dans le menu de **recherche de binôme** :mag: !
+
+Sélectionne le type de plongées que tu souhaitera réaliser avec ton futur binôme"""
+
+
+RECHERCHE_NO_RESULT = """
+Aucun plongeur ne correspond à vos critères :cry:, réessayez sans filtrer par région ou en diminuant le nombre de critères."""
 
 
 RECHERCHE_RESULTS = """
@@ -215,3 +239,8 @@ En cliquant sur "Suivant", vous acceptez que les informations que vous allez ren
 Pour + d'information à ce sujet, utilisez `/rgpd`
 
 *Notez qu'aucune information ne sera enregistrée avant la dernière confirmation (juste après la description optionnelle)*"""
+
+
+NO_RESULT_METEO = """
+`{ville}` n'a pas été trouvée.
+Vérifiez l'orthographe et réessayez."""

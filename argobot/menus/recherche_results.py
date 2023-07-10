@@ -76,7 +76,8 @@ class ContactButton(pages.PaginatorButton):
         current_name = self.paginator.pages[self.paginator.current_page].nomPlongeur
 
         msg = CONSTANTES.messages.RECHERCHE_CONTACT.format(name = current_name, id = current_id)
-        await interaction.response.edit_message(content=msg, view=self.paginator.custom_view)
+
+        await interaction.response.edit_message(content=msg)
 
 
 
